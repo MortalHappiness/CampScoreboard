@@ -7,19 +7,47 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
+    "bcrypt": "^5.0.0",
+    "connect-redis": "^5.0.0",
+    "dotenv": "^8.2.0",
+    "express-async-handler": "^1.1.4",
+    "express-session": "^1.17.1",
+    "http-proxy-middleware": "^1.0.5",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.2.11",
+    "mongoose": "^5.9.26",
+    "morgan": "^1.10.0",
+    "node-uuid": "^1.4.8",
+    "prettier": "2.0.5",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-redux": "^7.2.1",
-    "react-scripts": "3.4.1"
+    "react-scripts": "3.4.1",
+    "redis": "^3.0.2"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "develop": "NODE_ENV=development nodemon src/server/app.js --watch src/server",
+    "serve": "NODE_ENV=production node src/server/app.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": [
+      "react-app",
+      "plugin:prettier/recommended"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --write"
+    ]
   },
   "browserslist": {
     "production": [
@@ -32,5 +60,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "nodemon": "^2.0.4"
   }
 }
