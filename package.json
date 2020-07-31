@@ -30,6 +30,7 @@
     "build": "react-scripts build",
     "develop": "NODE_ENV=development nodemon src/server/app.js --watch src/server",
     "serve": "NODE_ENV=production node src/server/app.js",
+    "format": "prettier --write .",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
