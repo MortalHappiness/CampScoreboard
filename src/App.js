@@ -4,10 +4,10 @@ import {
   Switch,
   Route,
   Redirect,
-  Link,
 } from "react-router-dom";
 
 import TopBar from "./app/TopBar";
+import Scoreboard from "./features/scoreboard";
 import NotificationList from "./features/notifications";
 
 import "./App.css";
@@ -21,14 +21,7 @@ export default function App() {
         <TopBar />
         <Switch>
           <Route exact path="/">
-            <Link to="/admin">
-              To Admin page
-              <br />
-            </Link>
-            <Link to="/npc">
-              To NPC page
-              <br />
-            </Link>
+            <Scoreboard />
           </Route>
           <Route exact path="/information">
             Information page
