@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch, Route } from "react-router-dom";
+import { Switch, Route, useLocation, useHistory } from "react-router-dom";
 
 import { makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
@@ -28,15 +28,31 @@ const BarTitle = () => {
         <Route path="/admin">Admin Page</Route>
         <Route path="/npc">NPC Page</Route>
         <Route path="/information">Information</Route>
+        <Route path="/notifications">Notifications</Route>
         <Route path="/">Scoreboard</Route>
       </Switch>
     </Typography>
   );
 };
 
-const NotificationButtonMenu = () => {
+const NotificationButtonLink = () => {
+  const { pathname } = useLocation();
+  const history = useHistory();
+  console.log(history);
+  const handleOnClick = () => {
+    if (pathname !== "/notifications") {
+      history.push("/notifications");
+    } else {
+      history.goBack();
+    }
+  };
+
   return (
-    <IconButton aria-label="show notifications" color="inherit">
+    <IconButton
+      aria-label="show notifications"
+      onClick={handleOnClick}
+      color="inherit"
+    >
       <Badge badgeContent={7} color="secondary">
         <NotificationsIcon />
       </Badge>
@@ -54,7 +70,7 @@ export default function TopBar() {
           <MenuButtonDrawer />
           <BarTitle />
           <div className={classes.grow} />
-          <NotificationButtonMenu />
+          <NotificationButtonLink />
         </Toolbar>
       </AppBar>
     </div>

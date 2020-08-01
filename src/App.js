@@ -27,13 +27,12 @@ export default function App() {
               To NPC page
               <br />
             </Link>
-            <Link to="/information">
-              To information page
-              <br />
-            </Link>
           </Route>
           <Route exact path="/information">
             Information page
+          </Route>
+          <Route exact path="/notifications">
+            Notification page
           </Route>
           <Route exact path="/admin">
             Admin page
