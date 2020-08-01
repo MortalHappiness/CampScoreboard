@@ -27,6 +27,7 @@ const BarTitle = () => {
       <Switch>
         <Route path="/admin">Admin Page</Route>
         <Route path="/npc">NPC Page</Route>
+        <Route path="/information">Information</Route>
         <Route path="/">Scoreboard</Route>
       </Switch>
     </Typography>

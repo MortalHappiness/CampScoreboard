@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLocation, useHistory } from "react-router-dom";
 
 import { makeStyles } from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
@@ -24,6 +25,25 @@ const useStyles = makeStyles((theme) => ({
 
 // ========================================
 
+const ListItemLink = ({ to, icon, text }) => {
+  const { pathname } = useLocation();
+  const history = useHistory();
+  const isMatch = to === pathname;
+
+  const handleOnClick = () => {
+    if (!isMatch) {
+      history.push(to);
+    }
+  };
+
+  return (
+    <ListItem button onClick={handleOnClick} selected={isMatch}>
+      <ListItemIcon>{icon}</ListItemIcon>
+      <ListItemText primary={text} />
+    </ListItem>
+  );
+};
+
 export default function MenuButtonDrawer() {
   const classes = useStyles();
   const [isOpen, setIsOpen] = useState(false);
@@ -47,19 +67,12 @@ export default function MenuButtonDrawer() {
       onKeyDown={toggleDrawer(false)}
     >
       <List>
-        <ListItem button>
-          <ListItemIcon>
-            <PollIcon />
-          </ListItemIcon>
-          <ListItemText primary={"Scoreboard"} />
-        </ListItem>
-
-        <ListItem button>
-          <ListItemIcon>
-            <InfoIcon />
-          </ListItemIcon>
-          <ListItemText primary={"Information"} />
-        </ListItem>
+        <ListItemLink to="/" icon={<PollIcon />} text={"Scoreboard"} />
+        <ListItemLink
+          to="/information"
+          icon={<InfoIcon />}
+          text={"Information"}
+        />
       </List>
     </div>
   );
