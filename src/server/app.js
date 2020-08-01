@@ -7,8 +7,10 @@ const https = require("https");
 const express = require("express");
 const logger = require("morgan");
 const session = require("express-session");
+const asyncHandler = require("express-async-handler");
 const redis = require("redis");
 const connectRedis = require("connect-redis");
+const bcrypt = require("bcrypt");
 
 const apiRouter = require("./routes/api");
 
@@ -39,7 +41,7 @@ if (NODE_ENV === "development" && HTTPS) {
   server = http.createServer(app);
 }
 
-const sio = require("socket.io")(server);
+const io = require("socket.io")(server);
 
 const redisClient = redis.createClient(6379, REDIS_HOST);
 redisClient.on("error", console.error);
@@ -82,7 +84,7 @@ if (NODE_ENV === "production") {
 const sessionMiddleware = session(sessionOptions);
 
 // Share express session with socket io
-sio.use((socket, next) => {
+io.use((socket, next) => {
   sessionMiddleware(socket.request, socket.request.res || {}, next);
 });
 
@@ -93,7 +95,11 @@ app.use(sessionMiddleware);
 
 app.use(logger("dev"));
 app.use(express.static(path.join(process.cwd(), "build")));
-app.use("/api", apiRouter);
+
+app.get("/api", (req, res) => {
+  res.send("api");
+});
+
 app.get("/*", (req, res) => {
   res.sendFile(path.join(process.cwd(), "build", "index.html"));
 });
@@ -101,9 +107,12 @@ app.get("/*", (req, res) => {
 // ========================================
 // Handle socket events
 
-sio.sockets.on("connection", (socket) => {
-  console.log("A user connected!");
+io.on("connection", (socket) => {
+  console.log(`A user connected, id = ${socket.id}`);
   console.log(socket.request.session);
+  socket.on("disconnect", () => {
+    console.log(`A user disconnected, id = ${socket.id}`);
+  });
 });
 
 // ========================================
