@@ -8,6 +8,8 @@ import {
 } from "react-router-dom";
 
 import TopBar from "./app/TopBar";
+import NotificationList from "./features/notifications";
+
 import "./App.css";
 
 // ========================================
@@ -32,7 +34,7 @@ export default function App() {
             Information page
           </Route>
           <Route exact path="/notifications">
-            Notification page
+            <NotificationList />
           </Route>
           <Route exact path="/admin">
             Admin page
