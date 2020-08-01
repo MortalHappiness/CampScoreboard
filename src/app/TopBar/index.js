@@ -1,4 +1,5 @@
 import React from "react";
+import clsx from "clsx";
 import { Switch, Route, useLocation, useHistory } from "react-router-dom";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -16,6 +17,12 @@ import MenuButtonDrawer from "./menu";
 const useStyles = makeStyles((theme) => ({
   grow: {
     flexGrow: 1,
+  },
+  selected: {
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    "&:hover, &.Mui-focusVisible": {
+      backgroundColor: "rgba(255, 255, 255, 0.3)",
+    },
   },
 }));
 
@@ -38,9 +45,11 @@ const BarTitle = () => {
 const NotificationButtonLink = () => {
   const { pathname } = useLocation();
   const history = useHistory();
-  console.log(history);
+  const classes = useStyles();
+  const match = pathname === "/notifications";
+
   const handleOnClick = () => {
-    if (pathname !== "/notifications") {
+    if (!match) {
       history.push("/notifications");
     } else {
       history.goBack();
@@ -52,6 +61,9 @@ const NotificationButtonLink = () => {
       aria-label="show notifications"
       onClick={handleOnClick}
       color="inherit"
+      disableFocusRipple
+      disableRipple
+      className={clsx(match && classes.selected)}
     >
       <Badge badgeContent={7} color="secondary">
         <NotificationsIcon />
