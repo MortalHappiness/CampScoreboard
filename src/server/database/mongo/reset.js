@@ -46,6 +46,7 @@ module.exports = () => {
         space.num = index;
         if (space.type === "building") {
           space.level = 1;
+          space.shouldDouble = false;
         }
         if (space.type === "game") {
           space.costs = [space.value];

@@ -40,6 +40,9 @@ const spaceSchema = new mongoose.Schema({
   suite: {
     type: Number,
   },
+  shouldDouble: {
+    type: Boolean,
+  },
   level: {
     type: Number,
   },
