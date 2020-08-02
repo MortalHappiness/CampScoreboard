@@ -30,17 +30,19 @@ export default ({ children }) => {
       default:
         console.error("Invalid NODE_ENV!");
     }
-    console.log(process.env.NODE_ENV);
 
     socket.on("connect", () => {
       console.log("Connected to server");
       dispatch(socketConnected());
-      console.log(socket);
     });
 
     socket.on("disconnect", () => {
       console.log("Disconnected from server");
       dispatch(socketDisconnected());
+    });
+
+    socket.on("UPDATE_SCORES", (data) => {
+      console.log(data);
     });
 
     ws = { socket };

@@ -19,7 +19,7 @@
     "http-proxy-middleware": "^1.0.5",
     "husky": "^4.2.5",
     "lint-staged": "^10.2.11",
-    "mongoose": "^5.9.26",
+    "mongoose": "^5.9.27",
     "morgan": "^1.10.0",
     "node-uuid": "^1.4.8",
     "prettier": "2.0.5",
@@ -29,7 +29,8 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
     "redis": "^3.0.2",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.3.0",
+    "yargs": "^15.4.1"
   },
   "scripts": {
     "start": "react-scripts start",

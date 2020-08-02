@@ -17,6 +17,6 @@ const socketSlice = createSlice({
 
 export const { socketConnected, socketDisconnected } = socketSlice.actions;
 
-export const selectIsConnected = (state) => state.isConnected;
+export const selectIsConnected = (state) => state.socket.isConnected;
 
 export default socketSlice.reducer;
