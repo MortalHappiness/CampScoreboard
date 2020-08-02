@@ -8,9 +8,12 @@ const playerSchema = new mongoose.Schema({
     required: true,
     immutable: true,
   },
-  score: {
+  money: {
     type: Number,
     required: true,
+  },
+  occupation: {
+    type: String,
   },
 });
 
@@ -18,6 +21,47 @@ const Player = mongoose.model("Player", playerSchema);
 
 // ========================================
 
+const spaceSchema = new mongoose.Schema({
+  num: {
+    type: Number,
+    required: true,
+    immutable: true,
+  },
+  name: {
+    type: String,
+    required: true,
+    immutable: true,
+  },
+  type: {
+    type: String,
+    required: true,
+    immutable: true,
+  },
+  suite: {
+    type: Number,
+  },
+  level: {
+    type: Number,
+  },
+  costs: {
+    type: [Number],
+  },
+  taxes: {
+    type: [Number],
+  },
+  ownedBy: {
+    type: String,
+  },
+  highestScore: {
+    type: Number,
+  },
+});
+
+const Space = mongoose.model("Space", spaceSchema);
+
+// ========================================
+
 module.exports = {
   Player,
+  Space,
 };

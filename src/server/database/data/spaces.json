@@ -1,0 +1,68 @@
+[
+  {
+    "name": "Go",
+    "type": "Go",
+    "values": [2000, 5000, 10000]
+  },
+  {
+    "name": "機會",
+    "type": "chance"
+  },
+  {
+    "name": "命運",
+    "type": "fate"
+  },
+  {
+    "name": "事件",
+    "type": "event"
+  },
+  {
+    "name": "商店",
+    "type": "store"
+  },
+  {
+    "name": "遊戲",
+    "type": "game",
+    "value": 5000
+  },
+  {
+    "name": "浴場",
+    "type": "building",
+    "suite": 1,
+    "costs": [140, 190, 340],
+    "taxes": [24, 48, 144]
+  },
+  {
+    "name": "理髮廳",
+    "type": "building",
+    "suite": 1,
+    "costs": [150, 205, 370],
+    "taxes": [26, 52, 156]
+  },
+  {
+    "name": "糖果店",
+    "type": "building",
+    "suite": 2,
+    "costs": [280, 400, 760],
+    "taxes": [32, 64, 192]
+  },
+  {
+    "name": "蛋糕店",
+    "type": "building",
+    "suite": 2,
+    "costs": [170, 400, 560],
+    "taxes": [34, 68, 204]
+  },
+  {
+    "name": "碼頭",
+    "type": "special-building",
+    "cost": 200,
+    "tax-base": 100
+  },
+  {
+    "name": "馬場",
+    "type": "special-building",
+    "cost": 200,
+    "tax-base": 100
+  }
+]
