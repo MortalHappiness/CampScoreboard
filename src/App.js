@@ -10,7 +10,7 @@ import { useSelector } from "react-redux";
 import { selectIsConnected } from "./features/socket/socketSlice";
 import TopBar from "./app/TopBar";
 import Loading from "./app/Loading";
-import Scoreboard from "./features/scoreboard";
+import Scoreboard from "./app/scoreboard";
 import NotificationList from "./features/notifications";
 
 import "./App.css";

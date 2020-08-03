@@ -9,6 +9,10 @@
     "type": "chance"
   },
   {
+    "name": "監獄",
+    "type": "prison"
+  },
+  {
     "name": "命運",
     "type": "fate"
   },
@@ -50,6 +54,34 @@
     "name": "蛋糕店",
     "type": "building",
     "suite": 2,
+    "costs": [170, 400, 560],
+    "taxes": [34, 68, 204]
+  },
+  {
+    "name": "花店",
+    "type": "building",
+    "suite": 3,
+    "costs": [170, 400, 560],
+    "taxes": [34, 68, 204]
+  },
+  {
+    "name": "金子店",
+    "type": "building",
+    "suite": 4,
+    "costs": [170, 400, 560],
+    "taxes": [34, 68, 204]
+  },
+  {
+    "name": "砲台",
+    "type": "building",
+    "suite": 5,
+    "costs": [170, 400, 560],
+    "taxes": [34, 68, 204]
+  },
+  {
+    "name": "教堂",
+    "type": "building",
+    "suite": 6,
     "costs": [170, 400, 560],
     "taxes": [34, 68, 204]
   },

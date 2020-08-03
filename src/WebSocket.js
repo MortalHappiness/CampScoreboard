@@ -7,6 +7,8 @@ import {
   socketDisconnected,
 } from "./features/socket/socketSlice";
 
+import { spacesUpdated } from "./features/spaces/spaceSlice";
+
 // ========================================
 
 const WebSocketContext = createContext(null);
@@ -41,8 +43,12 @@ export default ({ children }) => {
       dispatch(socketDisconnected());
     });
 
-    socket.on("UPDATE_SCORES", (data) => {
+    socket.on("UPDATE_MONEY", (data) => {
       console.log(data);
+    });
+
+    socket.on("UPDATE_SPACES", (data) => {
+      dispatch(spacesUpdated(data));
     });
 
     ws = { socket };
