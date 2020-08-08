@@ -1,21 +1,31 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createEntityAdapter } from "@reduxjs/toolkit";
 
-const initialState = [];
+const spacesAdapter = createEntityAdapter({
+  selectId: (space) => space.num,
+  sortComparer: (a, b) => a.num < b.num,
+});
+
+const initialState = spacesAdapter.getInitialState({
+  status: "idle",
+  error: null,
+});
 
 const spaceSlice = createSlice({
   name: "spaces",
   initialState,
   reducers: {
     spacesUpdated(state, action) {
-      action.payload.forEach((space) => {
-        state[space.num] = space;
-      });
+      spacesAdapter.upsertMany(state, action.payload);
     },
   },
 });
 
 export const { spacesUpdated } = spaceSlice.actions;
 
-export const selectSpaceByNum = (state, num) => state[num];
+export const {
+  selectAll: selectAllSpaces,
+  selectById: selectSpaceByNum,
+  selectIds: selectSpaceNums,
+} = spacesAdapter.getSelectors((state) => state.spaces);
 
 export default spaceSlice.reducer;

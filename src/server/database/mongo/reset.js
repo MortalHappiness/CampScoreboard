@@ -45,13 +45,15 @@ module.exports = () => {
       spaces.map(async (space, index) => {
         space.num = index;
         if (space.type === "building") {
-          space.level = 1;
+          space.level = 0;
           space.shouldDouble = false;
+          space.ownedBy = "";
         }
         if (space.type === "game") {
           space.costs = [space.value];
           delete space.value;
           space.highestScore = 0;
+          space.ownedBy = "";
         }
         if (space.type === "Go") {
           space.costs = space.values;
@@ -62,6 +64,7 @@ module.exports = () => {
           space.taxes = [space["tax-base"]];
           delete space.cost;
           delete space["tax-base"];
+          space.ownedBy = "";
         }
         const spaceDocument = new model.Space(space);
         await spaceDocument.save();

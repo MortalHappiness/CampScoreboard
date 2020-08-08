@@ -10,7 +10,7 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import Drawer from "@material-ui/core/Drawer";
 import PollIcon from "@material-ui/icons/Poll";
-import InfoIcon from "@material-ui/icons/Info";
+import WidgetsIcon from "@material-ui/icons/Widgets";
 
 // ========================================
 
@@ -68,11 +68,7 @@ export default function MenuButtonDrawer() {
     >
       <List>
         <ListItemLink to="/" icon={<PollIcon />} text={"Scoreboard"} />
-        <ListItemLink
-          to="/information"
-          icon={<InfoIcon />}
-          text={"Information"}
-        />
+        <ListItemLink to="/spaces" icon={<WidgetsIcon />} text={"Spaces"} />
       </List>
     </div>
   );

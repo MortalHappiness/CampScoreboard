@@ -34,7 +34,7 @@ const BarTitle = () => {
       <Switch>
         <Route path="/admin">Admin Page</Route>
         <Route path="/npc">NPC Page</Route>
-        <Route path="/information">Information</Route>
+        <Route path="/spaces">Spaces</Route>
         <Route path="/notifications">Notifications</Route>
         <Route path="/">Scoreboard</Route>
       </Switch>
@@ -76,15 +76,13 @@ export default function TopBar() {
   const classes = useStyles();
 
   return (
-    <div className={classes.grow}>
-      <AppBar position="static">
-        <Toolbar>
-          <MenuButtonDrawer />
-          <BarTitle />
-          <div className={classes.grow} />
-          <NotificationButtonLink />
-        </Toolbar>
-      </AppBar>
-    </div>
+    <AppBar position="sticky">
+      <Toolbar>
+        <MenuButtonDrawer />
+        <BarTitle />
+        <div className={classes.grow} />
+        <NotificationButtonLink />
+      </Toolbar>
+    </AppBar>
   );
 }
