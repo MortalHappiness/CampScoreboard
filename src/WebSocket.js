@@ -8,6 +8,7 @@ import {
 } from "./features/socket/socketSlice";
 
 import { spacesUpdated } from "./features/spaces/spaceSlice";
+import { playersUpdated } from "./features/scoreboard/playerSlice";
 
 // ========================================
 
@@ -44,7 +45,7 @@ export default ({ children }) => {
     });
 
     socket.on("UPDATE_MONEY", (data) => {
-      console.log(data);
+      dispatch(playersUpdated(data));
     });
 
     socket.on("UPDATE_SPACES", (data) => {

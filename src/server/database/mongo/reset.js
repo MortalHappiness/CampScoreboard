@@ -34,6 +34,8 @@ module.exports = () => {
     // Save all players
     await Promise.all(
       players.map(async (player) => {
+        player.money = 15000;
+        player.score = 15000;
         const playerDocument = new model.Player(player);
         await playerDocument.save();
       })

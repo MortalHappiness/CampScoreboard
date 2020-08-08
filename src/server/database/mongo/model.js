@@ -3,6 +3,11 @@ const mongoose = require("mongoose");
 // ========================================
 
 const playerSchema = new mongoose.Schema({
+  id: {
+    type: Number,
+    require: true,
+    immutable: true,
+  },
   name: {
     type: String,
     required: true,
@@ -14,6 +19,10 @@ const playerSchema = new mongoose.Schema({
   },
   occupation: {
     type: String,
+  },
+  score: {
+    type: Number,
+    required: true,
   },
 });
 
