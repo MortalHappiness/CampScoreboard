@@ -5,10 +5,7 @@ const spacesAdapter = createEntityAdapter({
   sortComparer: (a, b) => a.num > b.num,
 });
 
-const initialState = spacesAdapter.getInitialState({
-  status: "idle",
-  error: null,
-});
+const initialState = spacesAdapter.getInitialState();
 
 const spaceSlice = createSlice({
   name: "spaces",
