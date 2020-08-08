@@ -65,6 +65,7 @@ module.exports = () => {
           delete space.cost;
           delete space["tax-base"];
           space.ownedBy = "";
+          space.multiple = 0;
         }
         const spaceDocument = new model.Space(space);
         await spaceDocument.save();

@@ -55,6 +55,9 @@ const spaceSchema = new mongoose.Schema({
   ownedBy: {
     type: String,
   },
+  multiple: {
+    type: Number,
+  },
   highestScore: {
     type: Number,
   },
