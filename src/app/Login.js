@@ -36,6 +36,10 @@ export default function SignIn() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+  };
+
   const handleNameChange = (e) => {
     setName(e.target.value);
   };
@@ -54,7 +58,7 @@ export default function SignIn() {
         <Typography component="h1" variant="h5">
           Login
         </Typography>
-        <form className={classes.form} noValidate>
+        <form className={classes.form} noValidate onSubmit={handleSubmit}>
           <TextField
             variant="outlined"
             margin="normal"
