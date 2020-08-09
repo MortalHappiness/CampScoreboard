@@ -46,7 +46,7 @@ const useStyles = makeStyles({
     overflow: "scroll",
   },
   tablehead: {
-    backgroundColor: "black",
+    backgroundColor: "rgb(50, 50, 50)",
     "& > *": {
       color: "white",
     },
@@ -81,16 +81,16 @@ const avatarColors = {
   "go-prison": "#3d3d3d",
   event: "#3d3d3d",
   store: "#3d3d3d",
-  game: "rgb(199, 159, 81)",
+  game: "rgb(225, 126, 34)",
   building: {
-    1: "rgb(255, 108, 108)",
-    2: "rgb(120, 132, 114)",
-    3: "rgb(169, 182, 188)",
-    4: "rgb(180, 180, 180)",
-    5: "rgb(240, 226, 223)",
-    6: "rgb(240, 235, 232)",
+    1: "rgb(249, 179, 40)",
+    2: "rgb(192, 91, 0)",
+    3: "rgb(104, 127, 73)",
+    4: "rgb(150, 187, 117)",
+    5: "rgb(98, 167, 196)",
+    6: "rgb(0, 127, 141)",
   },
-  "special-building": "#ff00a2",
+  "special-building": "rgb(0, 68, 89)",
 };
 
 const GameRating = withStyles({
