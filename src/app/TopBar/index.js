@@ -77,13 +77,16 @@ export default function TopBar() {
   const classes = useStyles();
 
   return (
-    <AppBar position="sticky">
-      <Toolbar>
-        <MenuButtonDrawer />
-        <BarTitle />
-        <div className={classes.grow} />
-        <NotificationButtonLink />
-      </Toolbar>
-    </AppBar>
+    <>
+      <AppBar position="fixed">
+        <Toolbar>
+          <MenuButtonDrawer />
+          <BarTitle />
+          <div className={classes.grow} />
+          <NotificationButtonLink />
+        </Toolbar>
+      </AppBar>
+      <Toolbar />
+    </>
   );
 }
