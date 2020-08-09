@@ -233,7 +233,7 @@ function Row({ num }) {
 
   return (
     <>
-      <TableRow key={num} style={{ backgroundColor }} onClick={handleClickOpen}>
+      <TableRow style={{ backgroundColor }} onClick={handleClickOpen}>
         <TableCell align="center" padding="none">
           <Avatar className={classes.num}>{num}</Avatar>
         </TableCell>

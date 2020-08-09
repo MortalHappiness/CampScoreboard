@@ -12,7 +12,7 @@ import Box from "@material-ui/core/Box";
 import { selectIsConnected } from "./features/socket/socketSlice";
 import TopBar from "./app/TopBar";
 import Loading from "./app/Loading";
-import Scoreboard from "./app/scoreboard";
+import Scoreboard from "./features/scoreboard";
 import SpacesList from "./features/spaces";
 import NotificationList from "./features/notifications";
 

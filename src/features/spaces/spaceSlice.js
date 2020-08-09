@@ -2,7 +2,7 @@ import { createSlice, createEntityAdapter } from "@reduxjs/toolkit";
 
 const spacesAdapter = createEntityAdapter({
   selectId: (space) => space.num,
-  sortComparer: (a, b) => a.num > b.num,
+  sortComparer: (a, b) => a.num - b.num,
 });
 
 const initialState = spacesAdapter.getInitialState();

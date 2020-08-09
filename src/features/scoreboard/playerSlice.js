@@ -2,7 +2,7 @@ import { createSlice, createEntityAdapter } from "@reduxjs/toolkit";
 
 const playerAdapter = createEntityAdapter({
   selectId: (player) => player.id,
-  sortComparer: (a, b) => a.id > b.id,
+  sortComparer: (a, b) => b.score - a.score,
 });
 
 const initialState = playerAdapter.getInitialState();
