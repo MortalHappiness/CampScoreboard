@@ -50,6 +50,13 @@ const useStyles = makeStyles({
       color: "white",
     },
   },
+  tablerow: {
+    backgroundColor: "white",
+  },
+  numcell: {
+    color: "white",
+    padding: "5px 0 5px 3px",
+  },
   num: {
     backgroundColor: "#ab1010",
     color: "white",
@@ -68,7 +75,7 @@ const useStyles = makeStyles({
   },
 });
 
-const rowColor = {
+const avatarColors = {
   Go: "#49d849",
   chance: "#e856dc",
   fate: "#d05a5a",
@@ -111,14 +118,14 @@ const spaceDetail = (space) => {
 
   let levelComponent;
   let owner;
-  let backgroundColor = rowColor[type];
+  let avatarColor = avatarColors[type];
   let dialogContent = {};
 
   switch (type) {
     case "building":
       levelComponent = <Rating max={3} value={level} readOnly />;
       owner = ownedBy || "N/A";
-      backgroundColor = rowColor["building"][suite];
+      avatarColor = avatarColors["building"][suite];
       dialogContent = {
         種類: "房產格",
         系列: suite,
@@ -215,7 +222,7 @@ const spaceDetail = (space) => {
       break;
   }
 
-  return { levelComponent, owner, backgroundColor, dialogContent };
+  return { levelComponent, owner, avatarColor, dialogContent };
 };
 
 function Row({ num }) {
@@ -233,15 +240,20 @@ function Row({ num }) {
   // Space extra attributes
   const space = useSelector((state) => selectSpaceByNum(state, num));
   const { name } = space;
-  const { levelComponent, owner, backgroundColor, dialogContent } = spaceDetail(
+  const { levelComponent, owner, avatarColor, dialogContent } = spaceDetail(
     space
   );
 
   return (
     <>
-      <TableRow style={{ backgroundColor }} onClick={handleClickOpen}>
-        <TableCell align="center" padding="none">
-          <Avatar className={classes.num}>{num}</Avatar>
+      <TableRow className={classes.tablerow} onClick={handleClickOpen}>
+        <TableCell align="center" padding="none" className={classes.numcell}>
+          <Avatar
+            style={{ backgroundColor: avatarColor }}
+            className={classes.num}
+          >
+            {num}
+          </Avatar>
         </TableCell>
         <TableCell align="center" padding="none">
           <b>{name}</b>
