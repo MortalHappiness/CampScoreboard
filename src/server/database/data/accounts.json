@@ -1,21 +1,21 @@
 [
   {
     "name": "admin",
-    "password": "admin"
+    "password": "admin-pass"
   },
   {
     "name": "npc1",
-    "password": "npc1",
+    "password": "npc1-pass",
     "spaces": [0, 1]
   },
   {
     "name": "npc2",
-    "password": "npc2",
+    "password": "npc2-pass",
     "spaces": [2, 3]
   },
   {
     "name": "npc3",
-    "password": "npc3",
+    "password": "npc3-pass",
     "spaces": [4]
   }
 ]
