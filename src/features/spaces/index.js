@@ -14,6 +14,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import Avatar from "@material-ui/core/Avatar";
+import Badge from "@material-ui/core/Badge";
 
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
@@ -50,12 +51,9 @@ const useStyles = makeStyles({
       color: "white",
     },
   },
-  tablerow: {
-    backgroundColor: "white",
-  },
   numcell: {
     color: "white",
-    padding: "5px 0 5px 3px",
+    padding: "7px 0 7px 3px",
   },
   num: {
     backgroundColor: "#ab1010",
@@ -76,28 +74,28 @@ const useStyles = makeStyles({
 });
 
 const avatarColors = {
-  Go: "#49d849",
-  chance: "#e856dc",
-  fate: "#d05a5a",
-  "see-prison": "#aaa",
-  "go-prison": "#bbb",
-  event: "#43d2ea",
-  store: "rgb(195, 195, 65)",
+  Go: "#3d3d3d",
+  chance: "#3d3d3d",
+  fate: "#3d3d3d",
+  "see-prison": "#3d3d3d",
+  "go-prison": "#3d3d3d",
+  event: "#3d3d3d",
+  store: "#3d3d3d",
   game: "rgb(199, 159, 81)",
   building: {
     1: "rgb(255, 108, 108)",
-    2: "#ff9c02",
-    3: "#ffff00",
-    4: "#a7f742",
-    5: "#42d4f7",
-    6: "#ab42f7",
+    2: "rgb(120, 132, 114)",
+    3: "rgb(169, 182, 188)",
+    4: "rgb(180, 180, 180)",
+    5: "rgb(240, 226, 223)",
+    6: "rgb(240, 235, 232)",
   },
   "special-building": "#ff00a2",
 };
 
 const GameRating = withStyles({
   iconFilled: {
-    color: "#0eed0c",
+    color: "#5fd808",
   },
 })(Rating);
 
@@ -119,13 +117,16 @@ const spaceDetail = (space) => {
   let levelComponent;
   let owner;
   let avatarColor = avatarColors[type];
+  let rowColor = "#ccc";
   let dialogContent = {};
+  let badgeContent = null;
 
   switch (type) {
     case "building":
       levelComponent = <Rating max={3} value={level} readOnly />;
       owner = ownedBy || "N/A";
       avatarColor = avatarColors["building"][suite];
+      rowColor = "#fff";
       dialogContent = {
         種類: "房產格",
         系列: suite,
@@ -141,6 +142,9 @@ const spaceDetail = (space) => {
         "2星租金": taxes[1],
         "3星租金": taxes[2],
       };
+      if (shouldDouble) {
+        badgeContent = "x2";
+      }
       break;
     case "special-building":
       levelComponent = (
@@ -153,6 +157,7 @@ const spaceDetail = (space) => {
         />
       );
       owner = ownedBy || "N/A";
+      rowColor = "#fff";
       dialogContent = {
         種類: "特殊房產格",
         擁有者: owner,
@@ -174,6 +179,7 @@ const spaceDetail = (space) => {
         />
       );
       owner = ownedBy || "N/A";
+      rowColor = "#fff";
       dialogContent = {
         種類: "遊戲格",
         擁有者: owner,
@@ -222,7 +228,14 @@ const spaceDetail = (space) => {
       break;
   }
 
-  return { levelComponent, owner, avatarColor, dialogContent };
+  return {
+    levelComponent,
+    owner,
+    avatarColor,
+    rowColor,
+    dialogContent,
+    badgeContent,
+  };
 };
 
 function Row({ num }) {
@@ -240,20 +253,27 @@ function Row({ num }) {
   // Space extra attributes
   const space = useSelector((state) => selectSpaceByNum(state, num));
   const { name } = space;
-  const { levelComponent, owner, avatarColor, dialogContent } = spaceDetail(
-    space
-  );
+  const {
+    levelComponent,
+    owner,
+    avatarColor,
+    rowColor,
+    dialogContent,
+    badgeContent,
+  } = spaceDetail(space);
 
   return (
     <>
-      <TableRow className={classes.tablerow} onClick={handleClickOpen}>
+      <TableRow style={{ backgroundColor: rowColor }} onClick={handleClickOpen}>
         <TableCell align="center" padding="none" className={classes.numcell}>
-          <Avatar
-            style={{ backgroundColor: avatarColor }}
-            className={classes.num}
-          >
-            {num}
-          </Avatar>
+          <Badge badgeContent={badgeContent} color="error">
+            <Avatar
+              style={{ backgroundColor: avatarColor }}
+              className={classes.num}
+            >
+              {num}
+            </Avatar>
+          </Badge>
         </TableCell>
         <TableCell align="center" padding="none">
           <b>{name}</b>
