@@ -1,0 +1,21 @@
+[
+  {
+    "name": "admin",
+    "password": "admin"
+  },
+  {
+    "name": "npc1",
+    "password": "npc1",
+    "spaces": [0, 1]
+  },
+  {
+    "name": "npc2",
+    "password": "npc2",
+    "spaces": [2, 3]
+  },
+  {
+    "name": "npc3",
+    "password": "npc3",
+    "spaces": [4]
+  }
+]

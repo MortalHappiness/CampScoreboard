@@ -7,6 +7,7 @@ import {
   socketDisconnected,
 } from "./features/socket/socketSlice";
 
+import { sessionUpdated } from "./features/session/sessionSlice";
 import { spacesUpdated } from "./features/spaces/spaceSlice";
 import { playersUpdated } from "./features/scoreboard/playerSlice";
 
@@ -42,6 +43,10 @@ export default ({ children }) => {
     socket.on("disconnect", () => {
       console.log("Disconnected from server");
       dispatch(socketDisconnected());
+    });
+
+    socket.on("UPDATE_SESSION", (data) => {
+      dispatch(sessionUpdated(data));
     });
 
     socket.on("UPDATE_MONEY", (data) => {

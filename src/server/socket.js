@@ -1,5 +1,10 @@
 const model = require("./database/mongo/model");
 
+function updateSession(socket) {
+  const { name } = socket.request.session;
+  socket.emit("UPDATE_SESSION", { name });
+}
+
 function updateMoney(socket) {
   model.Player.find({}, { _id: false, __v: false })
     .exec()
@@ -21,9 +26,9 @@ function updateSpaces(socket) {
 module.exports = (io) => {
   io.on("connection", (socket) => {
     console.log(`A user connected, id = ${socket.id}`);
-    console.log(socket.request.session);
     updateMoney(socket);
     updateSpaces(socket);
+    updateSession(socket);
     socket.on("disconnect", () => {
       console.log(`A user disconnected, id = ${socket.id}`);
     });

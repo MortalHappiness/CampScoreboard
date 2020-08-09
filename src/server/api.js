@@ -18,31 +18,29 @@ router
   .route("/session")
   .get(
     asyncHandler(async (req, res, next) => {
-      if (!req.session.userID) {
+      if (!req.session.name) {
         res.status(403).end();
         return;
       }
-      res.send({ userID: req.session.userID });
+      res.send({ name: req.session.name });
     })
   )
   .post(
     express.urlencoded({ extended: false }),
     asyncHandler(async (req, res, next) => {
-      let { userID } = req.body;
-      const { password } = req.body;
+      const { name, password } = req.body;
 
-      if (!userID || !password) {
+      if (!name || !password) {
         res.status(400).end();
         return;
       }
-      userID = userID.toUpperCase();
 
-      const user = await model.Student.findOne({ userID }, "password").exec();
+      const user = await model.Account.findOne({ name }, "passwordHash").exec();
       if (!user) {
         res.status(400).end();
         return;
       }
-      const passwordHash = user.password;
+      const { passwordHash } = user;
 
       // Check password with the passwordHash
       const match = await bcrypt.compare(password, passwordHash);
@@ -51,8 +49,8 @@ router
         return;
       }
 
-      req.session.userID = userID;
-      res.status(201).send({ userID });
+      req.session.name = name;
+      res.status(201).send({ name });
     })
   )
   .delete(

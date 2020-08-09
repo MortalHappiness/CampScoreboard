@@ -76,7 +76,29 @@ const Space = mongoose.model("Space", spaceSchema);
 
 // ========================================
 
+const accountSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    immutable: true,
+  },
+  passwordHash: {
+    type: String,
+    required: true,
+    immutable: true,
+  },
+  spaces: {
+    type: [Number],
+    immutable: true,
+  },
+});
+
+const Account = mongoose.model("Account", accountSchema);
+
+// ========================================
+
 module.exports = {
   Player,
   Space,
+  Account,
 };

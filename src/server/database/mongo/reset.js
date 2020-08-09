@@ -2,16 +2,20 @@
 
 const path = require("path");
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const model = require("./model");
 const players = require("../data/players.json");
 const spaces = require("../data/spaces.json");
+const accounts = require("../data/accounts.json");
 
 // ========================================
 
 require("dotenv").config({ path: path.resolve(__dirname, "../../../../.env") });
 
 const { MONGO_HOST, MONGO_DB_NAME } = process.env;
+
+const saltRounds = 10;
 
 // ========================================
 
@@ -74,6 +78,27 @@ module.exports = () => {
       })
     );
     console.log("All spaces are saved.");
+
+    // Use bcrypt to hash passwords of all accounts
+    console.log("Hashing passwords of all accounts...");
+    await Promise.all(
+      accounts.map(async (account) => {
+        const salt = await bcrypt.genSalt(saltRounds);
+        const passwordHash = await bcrypt.hash(account.password, salt);
+        account.passwordHash = passwordHash;
+        //delete account.password;
+      })
+    );
+    console.log("All passwords are hashed!");
+
+    // Save all accounts
+    await Promise.all(
+      accounts.map(async (account) => {
+        const accountDocument = new model.Account(account);
+        await accountDocument.save();
+      })
+    );
+    console.log("All accounts are saved.");
 
     // Disconnect
     await mongoose.disconnect();

@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { unwrapResult } from "@reduxjs/toolkit";
+import { useHistory } from "react-router-dom";
+
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -7,6 +11,9 @@ import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
+import FormHelperText from "@material-ui/core/FormHelperText";
+
+import { createSession } from "../features/session/sessionSlice";
 
 // ========================================
 
@@ -25,19 +32,40 @@ const useStyles = makeStyles((theme) => ({
     width: "100%", // Fix IE 11 issue.
     marginTop: theme.spacing(1),
   },
+  errorMsg: {
+    textAlign: "center",
+  },
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
 }));
 
-export default function SignIn() {
+export default function Login() {
   const classes = useStyles();
+  const history = useHistory();
 
+  const [loginStatus, setLoginStatus] = useState("idle");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
 
-  const handleSubmit = (e) => {
+  const dispatch = useDispatch();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loginStatus === "idle") {
+      try {
+        setLoginStatus("pending");
+        const resultAction = await dispatch(createSession({ name, password }));
+        unwrapResult(resultAction);
+        setError(null);
+        history.push("/");
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoginStatus("idle");
+      }
+    }
   };
 
   const handleNameChange = (e) => {
@@ -60,6 +88,7 @@ export default function SignIn() {
         </Typography>
         <form className={classes.form} noValidate onSubmit={handleSubmit}>
           <TextField
+            error={Boolean(error)}
             variant="outlined"
             margin="normal"
             required
@@ -72,6 +101,7 @@ export default function SignIn() {
             autoFocus
           />
           <TextField
+            error={Boolean(error)}
             variant="outlined"
             margin="normal"
             required
@@ -84,6 +114,9 @@ export default function SignIn() {
             onChange={handlePasswordChange}
             autoComplete="current-password"
           />
+          <FormHelperText error={Boolean(error)} className={classes.errorMsg}>
+            {error}
+          </FormHelperText>
           <Button
             type="submit"
             fullWidth
