@@ -89,7 +89,7 @@ function Row({ id, rank }) {
         {name}
       </TableCell>
       <TableCell align="center" padding="none">
-        {occupation || "煉金術師"}
+        {occupation || "N/A"}
       </TableCell>
       <TableCell align="center" padding="none">
         {money}
