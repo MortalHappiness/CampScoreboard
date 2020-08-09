@@ -81,16 +81,16 @@ const avatarColors = {
   "go-prison": "#3d3d3d",
   event: "#3d3d3d",
   store: "#3d3d3d",
-  game: "rgb(225, 126, 34)",
+  game: "rgb(249, 179, 40)",
   building: {
-    1: "rgb(249, 179, 40)",
-    2: "rgb(192, 91, 0)",
-    3: "rgb(104, 127, 73)",
-    4: "rgb(150, 187, 117)",
+    1: "rgb(225, 126, 34)",
+    2: "rgb(104, 127, 73)",
+    3: "rgb(0, 127, 141)",
+    4: "rgb(0, 68, 89)",
     5: "rgb(98, 167, 196)",
-    6: "rgb(0, 127, 141)",
+    6: "rgb(192, 91, 0)",
   },
-  "special-building": "rgb(0, 68, 89)",
+  "special-building": "rgb(150, 187, 117)",
 };
 
 const GameRating = withStyles({
