@@ -46,14 +46,17 @@ const useStyles = makeStyles({
   rank2: {
     backgroundColor: "#b5b4b4",
     color: "white",
+    fontWeight: "bold",
   },
   rank3: {
     backgroundColor: "#cc5700",
     color: "white",
+    fontWeight: "bold",
   },
   rankOther: {
     backgroundColor: "#f99090",
     color: "white",
+    fontWeight: "bold",
   },
 });
 
