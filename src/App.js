@@ -15,6 +15,7 @@ import Loading from "./app/Loading";
 import Scoreboard from "./features/scoreboard";
 import SpacesList from "./features/spaces";
 import NotificationList from "./features/notifications";
+import LoginForm from "./app/Login";
 
 import "./App.css";
 
@@ -38,6 +39,9 @@ export default function App() {
               </Route>
               <Route exact path="/notifications">
                 <NotificationList />
+              </Route>
+              <Route exact path="/login">
+                <LoginForm />
               </Route>
               <Route exact path="/admin">
                 Admin page

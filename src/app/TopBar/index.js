@@ -36,6 +36,7 @@ const BarTitle = () => {
         <Route path="/npc">NPC Page</Route>
         <Route path="/spaces">Spaces</Route>
         <Route path="/notifications">Notifications</Route>
+        <Route path="/login">Login</Route>
         <Route path="/">Scoreboard</Route>
       </Switch>
     </Typography>

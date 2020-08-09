@@ -72,7 +72,8 @@ const rowColor = {
   Go: "#49d849",
   chance: "#e856dc",
   fate: "#d05a5a",
-  prison: "#aaa",
+  "see-prison": "#aaa",
+  "go-prison": "#bbb",
   event: "#43d2ea",
   store: "rgb(195, 195, 65)",
   game: "rgb(199, 159, 81)",
@@ -189,9 +190,14 @@ const spaceDetail = (space) => {
         種類: "命運",
       };
       break;
-    case "prison":
+    case "see-prison":
       dialogContent = {
-        種類: "監獄",
+        種類: "探監",
+      };
+      break;
+    case "go-prison":
+      dialogContent = {
+        種類: "入獄",
       };
       break;
     case "event":
@@ -238,7 +244,7 @@ function Row({ num }) {
           <Avatar className={classes.num}>{num}</Avatar>
         </TableCell>
         <TableCell align="center" padding="none">
-          {name}
+          <b>{name}</b>
         </TableCell>
         <TableCell align="center" padding="none">
           {owner}

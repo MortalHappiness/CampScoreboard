@@ -1,100 +1,231 @@
 [
   {
-    "name": "Go",
+    "name": "Go格",
     "type": "Go",
-    "values": [2000, 5000, 10000]
+    "values": [20000, 25000, 30000, 35000, 40000]
   },
   {
-    "name": "機會",
-    "type": "chance"
-  },
-  {
-    "name": "監獄",
-    "type": "prison"
+    "name": "浴場",
+    "type": "building",
+    "suite": 1,
+    "costs": [12000, 8000, 8000],
+    "taxes": [2400, 4800, 14400]
   },
   {
     "name": "命運",
     "type": "fate"
   },
   {
-    "name": "事件",
-    "type": "event"
+    "name": "酒館",
+    "type": "building",
+    "suite": 1,
+    "costs": [14000, 8000, 8000],
+    "taxes": [2800, 5600, 16800]
+  },
+  {
+    "name": "傳遞畫畫",
+    "type": "game",
+    "value": 25000
+  },
+  {
+    "name": "碼頭",
+    "type": "special-building",
+    "cost": 20000,
+    "tax-base": 3500
+  },
+  {
+    "name": "修道院",
+    "type": "building",
+    "suite": 6,
+    "costs": [32000, 18000, 18000],
+    "taxes": [6400, 12800, 38400]
+  },
+  {
+    "name": "機會",
+    "type": "chance"
+  },
+  {
+    "name": "教堂",
+    "type": "building",
+    "suite": 6,
+    "costs": [33000, 18000, 18000],
+    "taxes": [6600, 13200, 39600]
+  },
+  {
+    "name": "王宮",
+    "type": "building",
+    "suite": 6,
+    "costs": [34000, 18000, 18000],
+    "taxes": [6800, 13600, 40800]
+  },
+  {
+    "name": "探監",
+    "type": "see-prison"
+  },
+  {
+    "name": "跳左跳右",
+    "type": "game",
+    "value": 25000
   },
   {
     "name": "商店",
     "type": "store"
   },
   {
-    "name": "遊戲",
-    "type": "game",
-    "value": 5000
-  },
-  {
-    "name": "浴場",
-    "type": "building",
-    "suite": 1,
-    "costs": [140, 190, 340],
-    "taxes": [24, 48, 144]
-  },
-  {
-    "name": "理髮廳",
-    "type": "building",
-    "suite": 1,
-    "costs": [150, 205, 370],
-    "taxes": [26, 52, 156]
-  },
-  {
     "name": "糖果店",
     "type": "building",
     "suite": 2,
-    "costs": [280, 400, 760],
-    "taxes": [32, 64, 192]
+    "costs": [16000, 10000, 10000],
+    "taxes": [3200, 6400, 19200]
   },
   {
     "name": "蛋糕店",
     "type": "building",
     "suite": 2,
-    "costs": [170, 400, 560],
-    "taxes": [34, 68, 204]
+    "costs": [17000, 10000, 10000],
+    "taxes": [3400, 6800, 20400]
   },
   {
-    "name": "花店",
-    "type": "building",
-    "suite": 3,
-    "costs": [170, 400, 560],
-    "taxes": [34, 68, 204]
+    "name": "植物園",
+    "type": "special-building",
+    "cost": 20000,
+    "tax-base": 3500
   },
   {
-    "name": "金子店",
+    "name": "披薩店",
     "type": "building",
-    "suite": 4,
-    "costs": [170, 400, 560],
-    "taxes": [34, 68, 204]
+    "suite": 2,
+    "costs": [18000, 10000, 10000],
+    "taxes": [3600, 7200, 21600]
+  },
+  {
+    "name": "命運",
+    "type": "fate"
+  },
+  {
+    "name": "護城河",
+    "type": "building",
+    "suite": 5,
+    "costs": [28000, 16000, 16000],
+    "taxes": [5600, 11200, 33600]
+  },
+  {
+    "name": "吊死鬼",
+    "type": "game",
+    "value": 25000
+  },
+  {
+    "name": "事件",
+    "type": "event"
   },
   {
     "name": "砲台",
     "type": "building",
     "suite": 5,
-    "costs": [170, 400, 560],
-    "taxes": [34, 68, 204]
+    "costs": [29000, 16000, 16000],
+    "taxes": [5800, 11600, 34800]
   },
   {
-    "name": "教堂",
+    "name": "機會",
+    "type": "chance"
+  },
+  {
+    "name": "城堡",
     "type": "building",
-    "suite": 6,
-    "costs": [170, 400, 560],
-    "taxes": [34, 68, 204]
+    "suite": 5,
+    "costs": [30000, 16000, 16000],
+    "taxes": [6000, 12000, 36000]
   },
   {
-    "name": "碼頭",
-    "type": "special-building",
-    "cost": 200,
-    "tax-base": 100
+    "name": "花店",
+    "type": "building",
+    "suite": 3,
+    "costs": [19000, 12000, 12000],
+    "taxes": [3800, 7600, 22800]
   },
   {
-    "name": "馬場",
+    "name": "墳場",
     "type": "special-building",
-    "cost": 200,
-    "tax-base": 100
+    "cost": 20000,
+    "tax-base": 3500
+  },
+  {
+    "name": "香水店",
+    "type": "building",
+    "suite": 3,
+    "costs": [20000, 12000, 12000],
+    "taxes": [4000, 8000, 24000]
+  },
+  {
+    "name": "瞎拚ABC",
+    "type": "game",
+    "value": 25000
+  },
+  {
+    "name": "商店",
+    "type": "store"
+  },
+  {
+    "name": "禮服店",
+    "type": "building",
+    "suite": 3,
+    "costs": [21000, 12000, 12000],
+    "taxes": [4200, 8400, 25200]
+  },
+  {
+    "name": "入獄",
+    "type": "go-prison"
+  },
+  {
+    "name": "含水猜歌",
+    "type": "game",
+    "value": 25000
+  },
+  {
+    "name": "競技場",
+    "type": "building",
+    "suite": 4,
+    "costs": [26000, 14000, 14000],
+    "taxes": [5200, 10400, 31200]
+  },
+  {
+    "name": "命運",
+    "type": "fate"
+  },
+  {
+    "name": "武具鋪",
+    "type": "building",
+    "suite": 4,
+    "costs": [25000, 14000, 14000],
+    "taxes": [5000, 10000, 30000]
+  },
+  {
+    "name": "醫院",
+    "type": "special-building",
+    "cost": 20000,
+    "tax-base": 3500
+  },
+  {
+    "name": "機會",
+    "type": "chance"
+  },
+  {
+    "name": "金子店",
+    "type": "building",
+    "suite": 4,
+    "costs": [24000, 14000, 14000],
+    "taxes": [4800, 9600, 28800]
+  },
+  {
+    "name": "海帶",
+    "type": "game",
+    "value": 25000
+  },
+  {
+    "name": "理髮廳",
+    "type": "building",
+    "suite": 1,
+    "costs": [13000, 8000, 8000],
+    "taxes": [2600, 5200, 15600]
   }
 ]
