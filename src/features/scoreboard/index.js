@@ -1,11 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 
-import {
-  makeStyles,
-  withStyles,
-  createMuiTheme,
-} from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -15,23 +11,9 @@ import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import Avatar from "@material-ui/core/Avatar";
 
-import Dialog from "@material-ui/core/Dialog";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import DialogContent from "@material-ui/core/DialogContent";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
-
-import Rating from "@material-ui/lab/Rating";
-import StarsIcon from "@material-ui/icons/Stars";
-import SportsEsportsIcon from "@material-ui/icons/SportsEsports";
-
 import { selectPlayerIds, selectPlayerById } from "./playerSlice";
 
 // ========================================
-
-const theme = createMuiTheme({
-  spacing: 4,
-});
 
 const useStyles = makeStyles({
   root: {
@@ -45,26 +27,33 @@ const useStyles = makeStyles({
     overflow: "scroll",
   },
   tablehead: {
-    backgroundColor: "black",
+    backgroundColor: "#5d5757",
     "& > *": {
       color: "white",
     },
   },
-  num: {
-    backgroundColor: "#ab1010",
+  tablerow: {
+    backgroundColor: "white",
+  },
+  rank: {
+    padding: "8px 0 8px 3px",
+  },
+  rank1: {
+    backgroundColor: "#ffee00",
+    color: "white",
+    fontWeight: "bold",
+  },
+  rank2: {
+    backgroundColor: "#b5b4b4",
     color: "white",
   },
-  dialogTitle: {
-    padding: theme.spacing(3),
+  rank3: {
+    backgroundColor: "#cc5700",
+    color: "white",
   },
-  closeButton: {
-    position: "absolute",
-    padding: theme.spacing(3),
-    right: 0,
-    top: 0,
-  },
-  dialogContent: {
-    padding: theme.spacing(3),
+  rankOther: {
+    backgroundColor: "#f99090",
+    color: "white",
   },
 });
 
@@ -76,16 +65,31 @@ function Row({ id, rank }) {
   const player = useSelector((state) => selectPlayerById(state, id));
   const { name, money, score, occupation } = player;
 
+  let avatarClassName;
+  switch (rank) {
+    case 1:
+      avatarClassName = classes.rank1;
+      break;
+    case 2:
+      avatarClassName = classes.rank2;
+      break;
+    case 3:
+      avatarClassName = classes.rank3;
+      break;
+    default:
+      avatarClassName = classes.rankOther;
+  }
+
   return (
-    <TableRow>
-      <TableCell align="center" padding="none">
-        <Avatar className={classes.num}>{rank}</Avatar>
+    <TableRow className={classes.tablerow}>
+      <TableCell align="center" padding="none" className={classes.rank}>
+        <Avatar className={avatarClassName}>{rank}</Avatar>
       </TableCell>
       <TableCell align="center" padding="none">
         {name}
       </TableCell>
       <TableCell align="center" padding="none">
-        {occupation || "N/A"}
+        {occupation || "煉金術師"}
       </TableCell>
       <TableCell align="center" padding="none">
         {money}
@@ -104,7 +108,7 @@ export default function SpacesList() {
   return (
     <Paper className={classes.root}>
       <TableContainer className={classes.container}>
-        <Table size="small" aria-label="table">
+        <Table aria-label="table">
           <TableHead>
             <TableRow className={classes.tablehead}>
               <TableCell align="center" padding="none"></TableCell>
