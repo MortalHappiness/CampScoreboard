@@ -68,8 +68,6 @@ export default function MoneyControl() {
 
   const handleChange = (e) => {
     const name = e.target.name;
-    console.log(state);
-    console.log(e.target.name, e.target.value);
     setState({
       ...state,
       [name]: e.target.value,

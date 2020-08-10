@@ -50,7 +50,6 @@ export default ({ children }) => {
     });
 
     socket.on("UPDATE_PLAYERS", (data) => {
-      console.log(data);
       dispatch(playersUpdated(data));
     });
 
