@@ -10,6 +10,29 @@ const router = express.Router();
 
 // ========================================
 
+async function updateMoney(io, { playerId, moneyChange }) {
+  const player = await model.Player.findOneAndUpdate(
+    { id: playerId },
+    { $inc: { money: moneyChange, score: moneyChange } }
+  );
+
+  if (!player) return false;
+
+  // Broadcast player update
+  const playerUpdate = await model.Player.findOne(
+    { id: playerId },
+    { _id: false, __v: false }
+  );
+  if (player) {
+    io.emit("UPDATE_PLAYERS", [playerUpdate]);
+  }
+
+  return true;
+}
+
+// ========================================
+// routes
+
 router.get("/", (req, res, next) => {
   res.send("api");
 });
@@ -59,5 +82,36 @@ router
       res.status(204).end();
     })
   );
+
+router.put(
+  "/money",
+  express.json({ strict: false }),
+  asyncHandler(async (req, res, next) => {
+    if (req.session.name !== "admin") {
+      res.status(403).end();
+      return;
+    }
+
+    const { playerId, moneyChange } = req.body;
+    if (
+      !playerId ||
+      !moneyChange ||
+      typeof playerId !== "number" ||
+      typeof moneyChange !== "number"
+    ) {
+      res.status(400).end();
+      return;
+    }
+
+    const { io } = req.app.locals;
+    const isSuccess = await updateMoney(io, { playerId, moneyChange });
+    if (!isSuccess) {
+      res.status(400).end();
+      return;
+    }
+
+    res.status(204).end();
+  })
+);
 
 module.exports = router;

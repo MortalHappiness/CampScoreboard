@@ -49,7 +49,8 @@ export default ({ children }) => {
       dispatch(sessionUpdated(data));
     });
 
-    socket.on("UPDATE_MONEY", (data) => {
+    socket.on("UPDATE_PLAYERS", (data) => {
+      console.log(data);
       dispatch(playersUpdated(data));
     });
 
