@@ -30,11 +30,13 @@ const sessionSlice = createSlice({
   reducers: {
     sessionUpdated(state, action) {
       state.name = action.payload.name;
+      state.spaces = action.payload.spaces;
     },
   },
   extraReducers: {
     [createSession.fulfilled]: (state, action) => {
       state.name = action.payload.name;
+      state.spaces = action.payload.spaces;
     },
   },
 });
@@ -42,5 +44,6 @@ const sessionSlice = createSlice({
 export const { sessionUpdated } = sessionSlice.actions;
 
 export const selectSessionName = (state) => state.session.name;
+export const selectSessionSpaces = (state) => state.session.spaces;
 
 export default sessionSlice.reducer;

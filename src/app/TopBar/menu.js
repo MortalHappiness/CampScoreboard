@@ -16,8 +16,12 @@ import WidgetsIcon from "@material-ui/icons/Widgets";
 import MonetizationOnOutlinedIcon from "@material-ui/icons/MonetizationOnOutlined";
 import RecordVoiceOverIcon from "@material-ui/icons/RecordVoiceOver";
 import RecentActorsIcon from "@material-ui/icons/RecentActors";
+import AddBoxIcon from "@material-ui/icons/AddBox";
 
-import { selectSessionName } from "../../features/session/sessionSlice";
+import {
+  selectSessionName,
+  selectSessionSpaces,
+} from "../../features/session/sessionSlice";
 
 // ========================================
 
@@ -54,6 +58,8 @@ const ListItemLink = ({ to, icon, text }) => {
 export default function MenuButtonDrawer() {
   const classes = useStyles();
   const userName = useSelector(selectSessionName);
+
+  const spaceIds = useSelector(selectSessionSpaces);
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -95,6 +101,18 @@ export default function MenuButtonDrawer() {
               icon={<RecordVoiceOverIcon />}
               text={"Broadcast"}
             />
+          </>
+        )}
+        {userName.startsWith("npc") && (
+          <>
+            {spaceIds.map((spaceId) => (
+              <ListItemLink
+                key={spaceId}
+                to={`/npc/space-control/${spaceId}`}
+                icon={<AddBoxIcon />}
+                text={`Space ${spaceId}`}
+              />
+            ))}
           </>
         )}
       </List>

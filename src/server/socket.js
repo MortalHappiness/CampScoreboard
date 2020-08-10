@@ -5,7 +5,8 @@ function updateSession(socket) {
   if (!session.name) {
     session.name = "guest";
   }
-  socket.emit("UPDATE_SESSION", { name: session.name });
+  const { name, spaces } = session;
+  socket.emit("UPDATE_SESSION", { name, spaces });
 }
 
 function updatePlayers(socket) {

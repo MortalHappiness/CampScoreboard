@@ -32,8 +32,19 @@ import "./App.css";
 const ProtectedRoute = ({ permission, children, ...rest }) => {
   const userName = useSelector(selectSessionName);
 
-  if (userName !== permission) {
-    return <NoPermission />;
+  switch (permission) {
+    case "admin":
+      if (userName !== "admin") {
+        return <NoPermission />;
+      }
+      break;
+    case "npc":
+      if (!userName.startsWith("npc")) {
+        return <NoPermission />;
+      }
+      break;
+    default:
+      break;
   }
 
   return <Route {...rest}>{children}</Route>;
@@ -75,9 +86,12 @@ export default function App() {
               <ProtectedRoute exact path="/admin/use-cards" permission="admin">
                 <UseCards />
               </ProtectedRoute>
-              <Route path="/npc/space-control/:spaceId">
+              <ProtectedRoute
+                path="/npc/space-control/:spaceId"
+                permission="npc"
+              >
                 <SpaceControl />
-              </Route>
+              </ProtectedRoute>
               <Redirect to="/" />
             </Switch>
           ) : (
