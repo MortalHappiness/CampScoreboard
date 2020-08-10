@@ -1,6 +1,12 @@
 import React from "react";
 import clsx from "clsx";
-import { Switch, Route, useLocation, useHistory } from "react-router-dom";
+import {
+  Switch,
+  Route,
+  useLocation,
+  useHistory,
+  useParams,
+} from "react-router-dom";
 
 import { makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
@@ -28,6 +34,11 @@ const useStyles = makeStyles((theme) => ({
 
 // ========================================
 
+const SpaceControlTitle = () => {
+  const { spaceId } = useParams();
+  return `Space ${spaceId}`;
+};
+
 const BarTitle = () => {
   return (
     <Typography variant="h6">
@@ -38,6 +49,9 @@ const BarTitle = () => {
         <Route path="/spaces">Spaces</Route>
         <Route path="/notifications">Notifications</Route>
         <Route path="/login">Login</Route>
+        <Route path="/npc/space-control/:spaceId">
+          <SpaceControlTitle />
+        </Route>
         <Route path="/">Scoreboard</Route>
       </Switch>
     </Typography>

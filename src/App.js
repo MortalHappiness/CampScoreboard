@@ -23,6 +23,8 @@ import MoneyControl from "./app/admin/MoneyControl";
 import UseCards from "./app/admin/UseCards";
 import Broadcast from "./app/admin/Broadcast";
 
+import SpaceControl from "./app/npc/SpaceControl";
+
 import "./App.css";
 
 // ========================================
@@ -73,9 +75,9 @@ export default function App() {
               <ProtectedRoute exact path="/admin/use-cards" permission="admin">
                 <UseCards />
               </ProtectedRoute>
-              <ProtectedRoute exact path="/npc">
-                NPC page
-              </ProtectedRoute>
+              <Route path="/npc/space-control/:spaceId">
+                <SpaceControl />
+              </Route>
               <Redirect to="/" />
             </Switch>
           ) : (
