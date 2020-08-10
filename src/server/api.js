@@ -114,7 +114,12 @@ router.put(
   "/money",
   express.json({ strict: false }),
   asyncHandler(async (req, res, next) => {
-    if (req.session.name !== "admin") {
+    const { name } = req.session;
+    if (!name || typeof name !== "string") {
+      res.status(403).end();
+      return;
+    }
+    if (name !== "admin" && !name.startsWith("npc")) {
       res.status(403).end();
       return;
     }
