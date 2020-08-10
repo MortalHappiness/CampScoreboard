@@ -45,7 +45,8 @@ router
         res.status(403).end();
         return;
       }
-      res.send({ name: req.session.name });
+      const { name, spaces } = req.session;
+      res.send({ name, spaces });
     })
   )
   .post(
@@ -58,12 +59,15 @@ router
         return;
       }
 
-      const user = await model.Account.findOne({ name }, "passwordHash").exec();
+      const user = await model.Account.findOne(
+        { name },
+        "spaces passwordHash"
+      ).exec();
       if (!user) {
         res.status(400).end();
         return;
       }
-      const { passwordHash } = user;
+      const { spaces, passwordHash } = user;
 
       // Check password with the passwordHash
       const match = await bcrypt.compare(password, passwordHash);
@@ -73,7 +77,8 @@ router
       }
 
       req.session.name = name;
-      res.status(201).send({ name });
+      req.session.spaces = spaces;
+      res.status(201).send({ name, spaces });
     })
   )
   .delete(
