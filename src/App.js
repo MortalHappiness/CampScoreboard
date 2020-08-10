@@ -13,10 +13,15 @@ import { selectIsConnected } from "./features/socket/socketSlice";
 import { selectSessionName } from "./features/session/sessionSlice";
 import TopBar from "./app/TopBar";
 import Loading from "./app/Loading";
+import NoPermission from "./app/NoPermission";
 import Scoreboard from "./features/scoreboard";
 import SpacesList from "./features/spaces";
 import NotificationList from "./features/notifications";
 import LoginForm from "./app/Login";
+
+import MoneyControl from "./app/admin/MoneyControl";
+import UseCards from "./app/admin/UseCards";
+import Broadcast from "./app/admin/Broadcast";
 
 import "./App.css";
 
@@ -26,7 +31,7 @@ const ProtectedRoute = ({ permission, children, ...rest }) => {
   const userName = useSelector(selectSessionName);
 
   if (userName !== permission) {
-    return <Redirect to="/login" />;
+    return <NoPermission />;
   }
 
   return <Route {...rest}>{children}</Route>;
@@ -55,8 +60,18 @@ export default function App() {
               <Route exact path="/login">
                 <LoginForm />
               </Route>
-              <ProtectedRoute exact path="/admin" permission="admin">
-                Admin page
+              <ProtectedRoute
+                exact
+                path="/admin/money-control"
+                permission="admin"
+              >
+                <MoneyControl />
+              </ProtectedRoute>
+              <ProtectedRoute exact path="/admin/broadcast" permission="admin">
+                <Broadcast />
+              </ProtectedRoute>
+              <ProtectedRoute exact path="/admin/use-cards" permission="admin">
+                <UseCards />
               </ProtectedRoute>
               <ProtectedRoute exact path="/npc">
                 NPC page

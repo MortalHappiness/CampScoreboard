@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import { makeStyles } from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
@@ -9,8 +10,14 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import Drawer from "@material-ui/core/Drawer";
+
 import PollIcon from "@material-ui/icons/Poll";
 import WidgetsIcon from "@material-ui/icons/Widgets";
+import MonetizationOnOutlinedIcon from "@material-ui/icons/MonetizationOnOutlined";
+import RecordVoiceOverIcon from "@material-ui/icons/RecordVoiceOver";
+import RecentActorsIcon from "@material-ui/icons/RecentActors";
+
+import { selectSessionName } from "../../features/session/sessionSlice";
 
 // ========================================
 
@@ -46,6 +53,8 @@ const ListItemLink = ({ to, icon, text }) => {
 
 export default function MenuButtonDrawer() {
   const classes = useStyles();
+  const userName = useSelector(selectSessionName);
+
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleDrawer = (open) => (event) => {
@@ -69,6 +78,25 @@ export default function MenuButtonDrawer() {
       <List>
         <ListItemLink to="/" icon={<PollIcon />} text={"Scoreboard"} />
         <ListItemLink to="/spaces" icon={<WidgetsIcon />} text={"Spaces"} />
+        {userName === "admin" && (
+          <>
+            <ListItemLink
+              to="/admin/money-control"
+              icon={<MonetizationOnOutlinedIcon />}
+              text={"Money Control"}
+            />
+            <ListItemLink
+              to="/admin/use-cards"
+              icon={<RecentActorsIcon />}
+              text={"Use Cards"}
+            />
+            <ListItemLink
+              to="/admin/broadcast"
+              icon={<RecordVoiceOverIcon />}
+              text={"Broadcast"}
+            />
+          </>
+        )}
       </List>
     </div>
   );

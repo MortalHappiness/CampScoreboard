@@ -32,8 +32,9 @@ const BarTitle = () => {
   return (
     <Typography variant="h6">
       <Switch>
-        <Route path="/admin">Admin Page</Route>
-        <Route path="/npc">NPC Page</Route>
+        <Route path="/admin/money-control">Money Control</Route>
+        <Route path="/admin/use-cards">Use Cards</Route>
+        <Route path="/admin/broadcast">Broadcast</Route>
         <Route path="/spaces">Spaces</Route>
         <Route path="/notifications">Notifications</Route>
         <Route path="/login">Login</Route>
