@@ -1,14 +1,234 @@
-import React from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useSelector } from "react-redux";
+
+import Button from "@material-ui/core/Button";
+import CssBaseline from "@material-ui/core/CssBaseline";
+import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
+import { makeStyles } from "@material-ui/core/styles";
+import Container from "@material-ui/core/Container";
+import FormHelperText from "@material-ui/core/FormHelperText";
+import InputLabel from "@material-ui/core/InputLabel";
+import FormControl from "@material-ui/core/FormControl";
+import Select from "@material-ui/core/Select";
+import NativeSelect from "@material-ui/core/NativeSelect";
+import MenuItem from "@material-ui/core/MenuItem";
+import Dialog from "@material-ui/core/Dialog";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogActions from "@material-ui/core/DialogActions";
+import Divider from "@material-ui/core/Divider";
+
+import Loading from "../Loading";
+
+import {
+  selectOrderedPlayerIds,
+  selectPlayerNameById,
+} from "../../features/scoreboard/playerSlice";
 
 // ========================================
 
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    marginTop: theme.spacing(8),
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  avatar: {
+    margin: theme.spacing(1),
+    backgroundColor: theme.palette.secondary.main,
+  },
+  form: {
+    width: "100%", // Fix IE 11 issue.
+    marginTop: theme.spacing(1),
+  },
+  errorMsg: {
+    textAlign: "center",
+  },
+  submit: {
+    margin: theme.spacing(3, 0, 2),
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
+  selectEmpty: {
+    marginTop: theme.spacing(2),
+  },
+  dialogTitle: {
+    textAlign: "center",
+  },
+}));
+
 export default function MoneyControl() {
-  return (
-    <div style={{ marginTop: "20px" }}>
-      <Typography variant="h5" component="h2" gutterBottom>
-        Money Control
-      </Typography>
-    </div>
+  const classes = useStyles();
+  const [players, setPlayers] = useState(null);
+
+  // Fetch players ids and names
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch("/api/players");
+      setPlayers(await res.json());
+    };
+
+    fetchData();
+  }, []);
+
+  // ========================================
+
+  // Handle input fields
+  const [state, setState] = React.useState({
+    team: "",
+    moneyChange: "",
+  });
+
+  const handleChange = (e) => {
+    const name = e.target.name;
+    console.log(state);
+    console.log(e.target.name, e.target.value);
+    setState({
+      ...state,
+      [name]: e.target.value,
+    });
+  };
+
+  // ========================================
+  // Dialog control (Success dialog)
+  const [dialogIsOpen, setDialogIsOpen] = useState(false);
+  const handleDialogClose = () => {
+    setDialogIsOpen(false);
+  };
+
+  // ========================================
+
+  // Handle submit
+  const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState(null);
+  const isMounted = useRef(true);
+
+  // set isMounted to false when we unmount the component
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      if (isSending) return;
+      setIsSending(true);
+      try {
+        const res = await fetch("/api/money", {
+          method: "PUT",
+          body: JSON.stringify({
+            playerId: Number(state.team),
+            moneyChange: Number(state.moneyChange),
+          }),
+          headers: {
+            "content-type": "application/json",
+          },
+        });
+        if (res.ok) {
+          setDialogIsOpen(true);
+        } else {
+          throw new Error("Invalid format");
+        }
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        if (isMounted.current) setIsSending(false);
+        setState({ ...state, moneyChange: "" });
+      }
+    },
+    [isSending, state]
+  );
+
+  // ========================================
+
+  return players ? (
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <div className={classes.paper}>
+        <form className={classes.form} onSubmit={handleSubmit}>
+          <FormControl
+            className={classes.formControl}
+            margin="normal"
+            required
+            fullWidth
+            error={Boolean(error)}
+          >
+            <InputLabel htmlFor="team">Team</InputLabel>
+            <NativeSelect
+              value={state.team}
+              onChange={handleChange}
+              inputProps={{
+                name: "team",
+                id: "team",
+              }}
+            >
+              <option aria-label="None" value="" />
+              {players.map(({ id, name }) => (
+                <option key={id} value={id}>
+                  {name}
+                </option>
+              ))}
+            </NativeSelect>
+          </FormControl>
+          <TextField
+            error={Boolean(error)}
+            variant="outlined"
+            margin="normal"
+            type="number"
+            required
+            fullWidth
+            id="money-change"
+            label="Money Change"
+            name="moneyChange"
+            value={state.moneyChange}
+            onChange={handleChange}
+          />
+          <FormHelperText error={Boolean(error)} className={classes.errorMsg}>
+            {error}
+          </FormHelperText>
+          <Button
+            type="submit"
+            disabled={isSending}
+            fullWidth
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+          >
+            Enter
+          </Button>
+        </form>
+      </div>
+      <Dialog
+        aria-label="dialog"
+        open={dialogIsOpen}
+        fullWidth
+        maxWidth="xs"
+        onClose={handleDialogClose}
+      >
+        <DialogTitle className={classes.dialogTitle}>
+          <b>Success!</b>
+        </DialogTitle>
+        <Divider />
+        <DialogActions>
+          <Button
+            autoFocus
+            fullWidth
+            onClick={handleDialogClose}
+            color="primary"
+          >
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
+  ) : (
+    <Loading />
   );
 }
