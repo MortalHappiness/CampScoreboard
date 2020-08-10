@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { unwrapResult } from "@reduxjs/toolkit";
 import { useHistory } from "react-router-dom";
@@ -43,19 +43,27 @@ const useStyles = makeStyles((theme) => ({
 export default function Login() {
   const classes = useStyles();
   const history = useHistory();
-
-  const [loginStatus, setLoginStatus] = useState("idle");
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
-
   const dispatch = useDispatch();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (loginStatus === "idle") {
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState(null);
+  const isMounted = useRef(true);
+
+  // set isMounted to false when we unmount the component
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      if (isSending) return;
+      setIsSending(true);
       try {
-        setLoginStatus("pending");
         const resultAction = await dispatch(createSession({ name, password }));
         unwrapResult(resultAction);
         setError(null);
@@ -63,10 +71,11 @@ export default function Login() {
       } catch (err) {
         setError(err.message);
       } finally {
-        setLoginStatus("idle");
+        if (isMounted.current) setIsSending(false);
       }
-    }
-  };
+    },
+    [dispatch, history, isSending, name, password]
+  );
 
   const handleNameChange = (e) => {
     setName(e.target.value);
@@ -119,6 +128,7 @@ export default function Login() {
           </FormHelperText>
           <Button
             type="submit"
+            disabled={isSending}
             fullWidth
             variant="contained"
             color="primary"
