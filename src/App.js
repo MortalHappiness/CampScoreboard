@@ -21,7 +21,7 @@ import LoginForm from "./app/Login";
 
 import MoneyControl from "./app/admin/MoneyControl";
 import UseCards from "./app/admin/UseCards";
-import Broadcast from "./app/admin/Broadcast";
+import SetOccupation from "./app/admin/SetOccupation";
 
 import SpaceControl from "./app/npc/SpaceControl";
 
@@ -80,8 +80,12 @@ export default function App() {
               >
                 <MoneyControl />
               </ProtectedRoute>
-              <ProtectedRoute exact path="/admin/broadcast" permission="admin">
-                <Broadcast />
+              <ProtectedRoute
+                exact
+                path="/admin/set-occupation"
+                permission="admin"
+              >
+                <SetOccupation />
               </ProtectedRoute>
               <ProtectedRoute exact path="/admin/use-cards" permission="admin">
                 <UseCards />

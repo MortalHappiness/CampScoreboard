@@ -14,7 +14,7 @@ import Drawer from "@material-ui/core/Drawer";
 import PollIcon from "@material-ui/icons/Poll";
 import WidgetsIcon from "@material-ui/icons/Widgets";
 import MonetizationOnOutlinedIcon from "@material-ui/icons/MonetizationOnOutlined";
-import RecordVoiceOverIcon from "@material-ui/icons/RecordVoiceOver";
+import WorkIcon from "@material-ui/icons/Work";
 import RecentActorsIcon from "@material-ui/icons/RecentActors";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 
@@ -97,9 +97,9 @@ export default function MenuButtonDrawer() {
               text={"Use Cards"}
             />
             <ListItemLink
-              to="/admin/broadcast"
-              icon={<RecordVoiceOverIcon />}
-              text={"Broadcast"}
+              to="/admin/set-occupation"
+              icon={<WorkIcon />}
+              text={"Set Occupation"}
             />
           </>
         )}

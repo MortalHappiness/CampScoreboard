@@ -45,7 +45,7 @@ const BarTitle = () => {
       <Switch>
         <Route path="/admin/money-control">Money Control</Route>
         <Route path="/admin/use-cards">Use Cards</Route>
-        <Route path="/admin/broadcast">Broadcast</Route>
+        <Route path="/admin/set-occupation">Set Occupation</Route>
         <Route path="/spaces">Spaces</Route>
         <Route path="/notifications">Notifications</Route>
         <Route path="/login">Login</Route>

@@ -44,9 +44,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function MoneyControl() {
+export default function SetOccupation() {
   const classes = useStyles();
   const [players, setPlayers] = useState(null);
+  const [occupations, setOccupations] = useState(null);
 
   // Fetch players ids and names
   useEffect(() => {
@@ -58,12 +59,22 @@ export default function MoneyControl() {
     fetchData();
   }, []);
 
+  // Fetch occupations
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch("/api/occupations");
+      setOccupations(await res.json());
+    };
+
+    fetchData();
+  }, []);
+
   // ========================================
 
   // Handle input fields
   const [state, setState] = React.useState({
     team: "",
-    moneyChange: "",
+    occupation: "",
   });
 
   const handleChange = (e) => {
@@ -103,11 +114,11 @@ export default function MoneyControl() {
       if (isSending) return;
       setIsSending(true);
       try {
-        const res = await fetch("/api/money", {
+        const res = await fetch("/api/occupation", {
           method: "PUT",
           body: JSON.stringify({
             playerId: Number(state.team),
-            moneyChange: Number(state.moneyChange),
+            occupation: state.occupation,
           }),
           headers: {
             "content-type": "application/json",
@@ -131,7 +142,7 @@ export default function MoneyControl() {
 
   // ========================================
 
-  return players ? (
+  return players && occupations ? (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
@@ -160,19 +171,30 @@ export default function MoneyControl() {
               ))}
             </NativeSelect>
           </FormControl>
-          <TextField
-            error={Boolean(error)}
-            variant="outlined"
+          <FormControl
+            className={classes.formControl}
             margin="normal"
-            type="number"
             required
             fullWidth
-            id="money-change"
-            label="Money Change"
-            name="moneyChange"
-            value={state.moneyChange}
-            onChange={handleChange}
-          />
+            error={Boolean(error)}
+          >
+            <InputLabel htmlFor="occupation">Occupation</InputLabel>
+            <NativeSelect
+              value={state.occupation}
+              onChange={handleChange}
+              inputProps={{
+                name: "occupation",
+                id: "occupation",
+              }}
+            >
+              <option aria-label="None" value="" />
+              {occupations.map((occupation) => (
+                <option key={occupation} value={occupation}>
+                  {occupation}
+                </option>
+              ))}
+            </NativeSelect>
+          </FormControl>
           <FormHelperText error={Boolean(error)} className={classes.errorMsg}>
             {error}
           </FormHelperText>
