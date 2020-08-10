@@ -14,7 +14,7 @@ async function updateMoney(io, { playerId, moneyChange }) {
   const player = await model.Player.findOneAndUpdate(
     { id: playerId },
     { $inc: { money: moneyChange, score: moneyChange } }
-  );
+  ).exec();
 
   if (!player) return false;
 
@@ -22,7 +22,7 @@ async function updateMoney(io, { playerId, moneyChange }) {
   const playerUpdate = await model.Player.findOne(
     { id: playerId },
     { _id: false, __v: false }
-  );
+  ).exec();
   if (player) {
     io.emit("UPDATE_PLAYERS", [playerUpdate]);
   }
@@ -111,6 +111,20 @@ router.put(
     }
 
     res.status(204).end();
+  })
+);
+
+// Get player ids and names
+router.get(
+  "/players",
+  asyncHandler(async (req, res, next) => {
+    const players = await model.Player.find(
+      {},
+      { _id: false, id: true, name: true }
+    )
+      .sort({ id: 1 })
+      .exec();
+    res.send(players);
   })
 );
 
