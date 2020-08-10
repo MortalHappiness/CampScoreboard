@@ -1,8 +1,11 @@
 const model = require("./database/mongo/model");
 
 function updateSession(socket) {
-  const { name } = socket.request.session;
-  socket.emit("UPDATE_SESSION", { name });
+  const { session } = socket.request;
+  if (!session.name) {
+    session.name = "guest";
+  }
+  socket.emit("UPDATE_SESSION", { name: session.name });
 }
 
 function updateMoney(socket) {

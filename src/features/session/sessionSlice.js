@@ -41,6 +41,6 @@ const sessionSlice = createSlice({
 
 export const { sessionUpdated } = sessionSlice.actions;
 
-export const selectName = (state) => state.session.name;
+export const selectSessionName = (state) => state.session.name;
 
 export default sessionSlice.reducer;

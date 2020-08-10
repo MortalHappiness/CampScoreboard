@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 import Box from "@material-ui/core/Box";
 
 import { selectIsConnected } from "./features/socket/socketSlice";
+import { selectSessionName } from "./features/session/sessionSlice";
 import TopBar from "./app/TopBar";
 import Loading from "./app/Loading";
 import Scoreboard from "./features/scoreboard";
@@ -21,15 +22,26 @@ import "./App.css";
 
 // ========================================
 
+const ProtectedRoute = ({ permission, children, ...rest }) => {
+  const userName = useSelector(selectSessionName);
+
+  if (userName !== permission) {
+    return <Redirect to="/login" />;
+  }
+
+  return <Route {...rest}>{children}</Route>;
+};
+
 export default function App() {
   const isConnected = useSelector(selectIsConnected);
+  const userName = useSelector(selectSessionName);
 
   return (
     <Router>
       <div className="App">
         <TopBar />
         <Box className="AppContent">
-          {isConnected ? (
+          {isConnected && userName ? (
             <Switch>
               <Route exact path="/">
                 <Scoreboard />
@@ -43,12 +55,12 @@ export default function App() {
               <Route exact path="/login">
                 <LoginForm />
               </Route>
-              <Route exact path="/admin">
+              <ProtectedRoute exact path="/admin" permission="admin">
                 Admin page
-              </Route>
-              <Route exact path="/npc">
+              </ProtectedRoute>
+              <ProtectedRoute exact path="/npc">
                 NPC page
-              </Route>
+              </ProtectedRoute>
               <Redirect to="/" />
             </Switch>
           ) : (
