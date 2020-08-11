@@ -167,6 +167,7 @@ const spaceDetail = (space) => {
         單棟租金: taxes[0],
         租金計算: "(擁有棟數) x (單棟租金)",
       };
+      badgeContent = String(multiple);
       break;
     case "game":
       levelComponent = (

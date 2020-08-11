@@ -44,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function ChangeOwner({ spaceNum, disabled }) {
+export default function BuySpace({ spaceNum, disabled }) {
   const classes = useStyles();
   const [players, setPlayers] = useState(null);
 
@@ -100,7 +100,7 @@ export default function ChangeOwner({ spaceNum, disabled }) {
       if (isSending) return;
       setIsSending(true);
       try {
-        const res = await fetch("/api/owner", {
+        const res = await fetch("/api/buy", {
           method: "PUT",
           body: JSON.stringify({
             playerId: Number(state.team),
@@ -113,7 +113,13 @@ export default function ChangeOwner({ spaceNum, disabled }) {
         if (res.ok) {
           setDialogIsOpen(true);
         } else {
-          throw new Error("Invalid format");
+          let json;
+          try {
+            json = await res.json();
+          } catch (e) {
+            throw new Error("Invalid format");
+          }
+          throw new Error(json.message);
         }
         setError(null);
       } catch (err) {
@@ -133,7 +139,7 @@ export default function ChangeOwner({ spaceNum, disabled }) {
       <CssBaseline />
       <div className={classes.paper}>
         <Typography component="h1" variant="h5">
-          Change Owner
+          Buy This Space
         </Typography>
         <form className={classes.form} onSubmit={handleSubmit}>
           <FormControl

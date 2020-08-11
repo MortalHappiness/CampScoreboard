@@ -10,7 +10,7 @@ const CONSTANTS = require("./database/data/constants.json");
 
 const router = express.Router();
 
-const { OCCUPATIONS } = CONSTANTS;
+const { OCCUPATIONS, BUILDING_SCORE_RATIO } = CONSTANTS;
 
 // ========================================
 
@@ -99,20 +99,33 @@ async function changeOwner(io, { spaceNum, playerId }) {
     { $set: { ownedBy: newOwner.name } }
   ).exec();
   if (!space) return false;
+  const { type } = space;
+  if (type !== "game" && type !== "building" && type !== "special-building") {
+    return false;
+  }
 
   const origPlayerName = space.ownedBy;
-  const value = space.costs[0];
+
+  let spaceValue;
+  if (type === "game") {
+    spaceValue = space.costs[0];
+  } else if (type === "special-building") {
+    spaceValue = space.costs[0] * BUILDING_SCORE_RATIO;
+  } else {
+    // building
+    spaceValue = space.costs[0] * BUILDING_SCORE_RATIO;
+  }
 
   // ========================================
   // Update scores
 
   await model.Player.findOneAndUpdate(
     { name: origPlayerName },
-    { $inc: { score: -value } }
+    { $inc: { score: -spaceValue } }
   ).exec();
   await model.Player.findOneAndUpdate(
     { id: playerId },
-    { $inc: { score: value } }
+    { $inc: { score: spaceValue } }
   ).exec();
 
   // ========================================
@@ -149,8 +162,102 @@ async function changeOwner(io, { spaceNum, playerId }) {
   return true;
 }
 
-// ========================================
+async function buySpace(io, { spaceNum, playerId }) {
+  // Find space and player
 
+  const space = await model.Space.findOne({ num: spaceNum }).exec();
+  if (!space) return false;
+  const { type } = space;
+  if (type !== "building" && type !== "special-building") return false;
+  if (space.ownedBy) return false;
+  const cost = space.costs[0];
+
+  const player = await model.Player.findOne({ id: playerId }).exec();
+  if (!player) return false;
+
+  // ========================================
+  // Buy the space
+
+  if (player.money < cost) {
+    throw new Error("Do not have enough money!");
+  }
+
+  await model.Player.findOneAndUpdate(
+    { id: playerId },
+    {
+      $inc: {
+        money: -cost,
+        score: Math.floor(cost * (BUILDING_SCORE_RATIO - 1)),
+      },
+    }
+  ).exec();
+
+  // ========================================
+  // Deal with space attributes change
+
+  let updatedSpacesNums = [spaceNum];
+
+  if (type === "building") {
+    const { suite } = space;
+    await model.Space.findOneAndUpdate(
+      { num: spaceNum },
+      { $set: { level: 1, ownedBy: player.name } }
+    ).exec();
+
+    // Check suite
+    const sameSuiteSpaces = await model.Space.find(
+      { suite },
+      "num ownedBy"
+    ).exec();
+    if (sameSuiteSpaces.every((space) => space.ownedBy === player.name)) {
+      await model.Space.updateMany({ suite }, { shouldDouble: true }).exec();
+      updatedSpacesNums = sameSuiteSpaces.map((space) => space.num);
+    }
+  } else {
+    // special-building
+    await model.Space.findOneAndUpdate(
+      { num: spaceNum },
+      { $set: { ownedBy: player.name } }
+    ).exec();
+
+    // Update multiple
+    const specialBuildings = await model.Space.find(
+      { ownedBy: player.name },
+      "num"
+    ).exec();
+    await model.Space.updateMany(
+      { ownedBy: player.name },
+      { multiple: specialBuildings.length }
+    ).exec();
+    updatedSpacesNums = specialBuildings.map((space) => space.num);
+  }
+
+  // ========================================
+
+  // Broadcast space update
+  const updatedSpaces = await Promise.all(
+    updatedSpacesNums.map(
+      async (num) =>
+        await model.Space.findOne({ num }, { _id: false, __v: false }).exec()
+    )
+  );
+  if (updatedSpaces) {
+    io.emit("UPDATE_SPACES", updatedSpaces);
+  }
+
+  // Broadcast players update
+  const playerUpdate = await model.Player.findOne(
+    { id: playerId },
+    { _id: false, __v: false }
+  ).exec();
+  if (playerUpdate) {
+    io.emit("UPDATE_PLAYERS", [playerUpdate]);
+  }
+
+  return true;
+}
+
+// ========================================
 // Now we have two permissions: "admin" and "npc"
 // All npcs have same permission
 function verifyPermission(name, permissions) {
@@ -412,6 +519,40 @@ router.put(
     const isSuccess = await giveGoMoney(io, { playerId });
     if (!isSuccess) {
       res.status(400).end();
+      return;
+    }
+
+    res.status(204).end();
+  })
+);
+
+// Change the owner of space
+router.put(
+  "/buy",
+  express.json({ strict: false }),
+  asyncHandler(async (req, res, next) => {
+    const { name } = req.session;
+    if (!verifyPermission(name, ["admin", "npc"])) {
+      res.status(403).end();
+      return;
+    }
+
+    const { spaceNum, playerId } = req.body;
+    if (typeof spaceNum !== "number" || typeof playerId !== "number") {
+      res.status(400).end();
+      return;
+    }
+
+    const { io } = req.app.locals;
+    try {
+      const isSuccess = await buySpace(io, { spaceNum, playerId });
+      if (!isSuccess) {
+        res.status(400).end();
+        return;
+      }
+    } catch (e) {
+      const { message } = e;
+      res.status(400).send({ message });
       return;
     }
 

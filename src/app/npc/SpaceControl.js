@@ -14,6 +14,7 @@ import MoneyControl from "../control/MoneyControl";
 import UpdateHighestScore from "../control/UpdateHighestScore";
 import ChangeOwner from "../control/ChangeOwner";
 import GiveGoMoney from "../control/GiveGoMoney";
+import BuySpace from "../control/BuySpace";
 
 // ========================================
 
@@ -67,26 +68,66 @@ export default function SpaceControl() {
   // ========================================
 
   let component, information;
-  const { type, name, num, ownedBy, costs, taxes, level, highestScore } = space;
+  const {
+    type,
+    name,
+    num,
+    ownedBy,
+    costs,
+    taxes,
+    level,
+    suite,
+    highestScore,
+    multiple,
+    shouldDouble,
+  } = space;
 
   switch (type) {
     case "building":
       // TODO
+      information = {
+        種類: "房產格",
+        系列: suite,
+        目前等級: level,
+        擁有者: ownedBy || "N/A",
+        目前租金:
+          level && (shouldDouble ? 2 * taxes[level - 1] : taxes[level - 1]),
+        租金加倍: String(shouldDouble),
+        購買價格: costs[0],
+        "1星升2星價格": costs[1],
+        "2星升3星價格": costs[2],
+        "1星租金": taxes[0],
+        "2星租金": taxes[1],
+        "3星租金": taxes[2],
+      };
       component = (
         <>
-          <div className={classes.section}>
-            <b>種類: </b>房產格
-          </div>
+          <Information data={information} />
+          <Divider />
+          <BuySpace spaceNum={num} disabled={Boolean(ownedBy)} />
+          <Divider />
+          <ChangeOwner spaceNum={num} disabled={!Boolean(ownedBy)} />
         </>
       );
       break;
     case "special-building":
       // TODO
+      information = {
+        種類: "特殊房產格",
+        擁有者: ownedBy || "N/A",
+        購買價格: costs[0],
+        目前租金: multiple * taxes[0],
+        擁有棟數: multiple,
+        單棟租金: taxes[0],
+        租金計算: "(擁有棟數) x (單棟租金)",
+      };
       component = (
         <>
-          <div className={classes.section}>
-            <b>種類: </b>特殊房產格
-          </div>
+          <Information data={information} />
+          <Divider />
+          <BuySpace spaceNum={num} disabled={Boolean(ownedBy)} />
+          <Divider />
+          <ChangeOwner spaceNum={num} disabled={!Boolean(ownedBy)} />
         </>
       );
       break;
