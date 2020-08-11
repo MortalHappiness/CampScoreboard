@@ -15,6 +15,7 @@ import UpdateHighestScore from "../control/UpdateHighestScore";
 import ChangeOwner from "../control/ChangeOwner";
 import GiveGoMoney from "../control/GiveGoMoney";
 import BuySpace from "../control/BuySpace";
+import UpgradeSpace from "../control/UpgradeSpace";
 
 // ========================================
 
@@ -105,6 +106,8 @@ export default function SpaceControl() {
           <Information data={information} />
           <Divider />
           <BuySpace spaceNum={num} disabled={Boolean(ownedBy)} />
+          <Divider />
+          <UpgradeSpace spaceNum={num} disabled={!Boolean(ownedBy)} />
           <Divider />
           <ChangeOwner spaceNum={num} disabled={!Boolean(ownedBy)} />
         </>

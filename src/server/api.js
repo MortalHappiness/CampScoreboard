@@ -313,6 +313,58 @@ async function buySpace(io, { spaceNum, playerId }) {
   return true;
 }
 
+async function upgradeSpace(io, { spaceNum, shouldPay }) {
+  const space = await model.Space.findOne({ num: spaceNum }).exec();
+  if (!space) return false;
+  const { type, level, ownedBy, costs } = space;
+  const cost = costs[level];
+  if (type !== "building") return false;
+  if (level !== 1 && level !== 2) return false;
+
+  const player = await model.Player.findOne({ name: ownedBy }).exec();
+  if (!player) return false;
+
+  if (shouldPay && player.money < cost) {
+    throw new Error("Do not have enough money!");
+  }
+
+  await model.Space.findOneAndUpdate(
+    { num: spaceNum },
+    { $inc: { level: 1 } }
+  ).exec();
+
+  // Broadcast space update
+  const spaceUpdate = await model.Space.findOne(
+    { num: spaceNum },
+    { _id: false, __v: false }
+  ).exec();
+  if (space) {
+    io.emit("UPDATE_SPACES", [spaceUpdate]);
+  }
+
+  if (shouldPay) {
+    await model.Player.findOneAndUpdate(
+      { name: ownedBy },
+      {
+        $inc: {
+          money: -cost,
+          score: Math.floor(cost * (BUILDING_SCORE_RATIO - 1)),
+        },
+      }
+    ).exec();
+    // Broadcast players update
+    const playerUpdate = await model.Player.findOne(
+      { name: ownedBy },
+      { _id: false, __v: false }
+    ).exec();
+    if (playerUpdate) {
+      io.emit("UPDATE_PLAYERS", [playerUpdate]);
+    }
+  }
+
+  return true;
+}
+
 // ========================================
 // Now we have two permissions: "admin" and "npc"
 // All npcs have same permission
@@ -602,6 +654,40 @@ router.put(
     const { io } = req.app.locals;
     try {
       const isSuccess = await buySpace(io, { spaceNum, playerId });
+      if (!isSuccess) {
+        res.status(400).end();
+        return;
+      }
+    } catch (e) {
+      const { message } = e;
+      res.status(400).send({ message });
+      return;
+    }
+
+    res.status(204).end();
+  })
+);
+
+// Upgrage the space (building)
+router.put(
+  "/upgrade",
+  express.json({ strict: false }),
+  asyncHandler(async (req, res, next) => {
+    const { name } = req.session;
+    if (!verifyPermission(name, ["admin", "npc"])) {
+      res.status(403).end();
+      return;
+    }
+
+    const { spaceNum, shouldPay } = req.body;
+    if (typeof spaceNum !== "number" || typeof shouldPay !== "boolean") {
+      res.status(400).end();
+      return;
+    }
+
+    const { io } = req.app.locals;
+    try {
+      const isSuccess = await upgradeSpace(io, { spaceNum, shouldPay });
       if (!isSuccess) {
         res.status(400).end();
         return;
