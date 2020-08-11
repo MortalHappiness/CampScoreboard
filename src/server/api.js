@@ -113,7 +113,10 @@ async function changeOwner(io, { spaceNum, playerId }) {
     spaceValue = space.costs[0] * BUILDING_SCORE_RATIO;
   } else {
     // building
-    spaceValue = space.costs[0] * BUILDING_SCORE_RATIO;
+    const currentBuildingValue = space.costs
+      .slice(0, space.level)
+      .reduce((a, b) => a + b, 0);
+    spaceValue = currentBuildingValue * BUILDING_SCORE_RATIO;
   }
 
   // ========================================
@@ -129,14 +132,67 @@ async function changeOwner(io, { spaceNum, playerId }) {
   ).exec();
 
   // ========================================
+  // Deal with space attributes change
 
-  // Broadcast space update
-  const spaceUpdate = await model.Space.findOne(
-    { num: spaceNum },
-    { _id: false, __v: false }
-  ).exec();
-  if (space) {
-    io.emit("UPDATE_SPACES", [spaceUpdate]);
+  let updatedSpacesNums = [spaceNum];
+
+  if (type === "building") {
+    // Check suite
+    const { suite } = space;
+    const sameSuiteSpaces = await model.Space.find(
+      { suite },
+      "num ownedBy"
+    ).exec();
+    const ownedByFirst = sameSuiteSpaces[0].ownedBy;
+    const shouldDouble = sameSuiteSpaces.every(
+      (space) => space.ownedBy === ownedByFirst
+    );
+    await model.Space.updateMany({ suite }, { shouldDouble }).exec();
+    updatedSpacesNums = sameSuiteSpaces.map((space) => space.num);
+  } else if (type === "special-building") {
+    // Update multiple
+    const specialBuildingsNewOwner = await model.Space.find(
+      { ownedBy: newOwner.name },
+      "num"
+    ).exec();
+    await model.Space.updateMany(
+      { ownedBy: newOwner.name },
+      { multiple: specialBuildingsNewOwner.length }
+    ).exec();
+    specialBuildingsNewOwner.forEach((space) => {
+      const { num } = space;
+      if (!updatedSpacesNums.includes(num)) {
+        updatedSpacesNums.push(num);
+      }
+    });
+
+    const specialBuildingsOrigOwner = await model.Space.find(
+      { ownedBy: origPlayerName },
+      "num"
+    ).exec();
+    await model.Space.updateMany(
+      { ownedBy: origPlayerName },
+      { multiple: specialBuildingsOrigOwner.length }
+    ).exec();
+    specialBuildingsOrigOwner.forEach((space) => {
+      const { num } = space;
+      if (!updatedSpacesNums.includes(num)) {
+        updatedSpacesNums.push(num);
+      }
+    });
+  }
+
+  // ========================================
+
+  // Broadcast spaces update
+  const updatedSpaces = await Promise.all(
+    updatedSpacesNums.map(
+      async (num) =>
+        await model.Space.findOne({ num }, { _id: false, __v: false }).exec()
+    )
+  );
+  if (updatedSpaces) {
+    io.emit("UPDATE_SPACES", updatedSpaces);
   }
 
   // Broadcast players update
@@ -234,7 +290,7 @@ async function buySpace(io, { spaceNum, playerId }) {
 
   // ========================================
 
-  // Broadcast space update
+  // Broadcast spaces update
   const updatedSpaces = await Promise.all(
     updatedSpacesNums.map(
       async (num) =>
