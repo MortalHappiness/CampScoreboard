@@ -2,6 +2,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 
+import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import Divider from "@material-ui/core/Divider";
 
@@ -9,7 +10,17 @@ import { selectSpaceByNum } from "../../features/spaces/spaceSlice";
 import { selectSessionSpaces } from "../../features/session/sessionSlice";
 import NoPermission from "../NoPermission";
 
-import MoneyControl from "../admin/MoneyControl";
+import MoneyControl from "../control/MoneyControl";
+import UpdateHighestScore from "../control/UpdateHighestScore";
+import ChangeOwner from "../control/ChangeOwner";
+
+// ========================================
+
+const useStyles = makeStyles({
+  section: {
+    margin: 15,
+  },
+});
 
 // ========================================
 
@@ -24,6 +35,8 @@ const WrappedTypography = ({ text }) => (
 // ========================================
 
 export default function SpaceControl() {
+  const classes = useStyles();
+
   const spaceId = Number(useParams().spaceId);
   const spaces = useSelector(selectSessionSpaces);
 
@@ -39,35 +52,125 @@ export default function SpaceControl() {
   // ========================================
 
   let component;
-  const { type, name } = space;
+  const { type, name, num, ownedBy, costs, taxes, highestScore } = space;
   switch (type) {
     case "building":
       // TODO
+      component = (
+        <>
+          <div className={classes.section}>
+            <b>種類: </b>房產格
+          </div>
+        </>
+      );
       break;
     case "special-building":
       // TODO
+      component = (
+        <>
+          <div className={classes.section}>
+            <b>種類: </b>特殊房產格
+          </div>
+        </>
+      );
       break;
     case "game":
       // TODO
+      const information = {
+        種類: "遊戲格",
+        擁有者: ownedBy || "N/A",
+        價值: costs[0],
+        目前最高分: highestScore,
+      };
+      component = (
+        <>
+          <div className={classes.section}>
+            {Object.entries(information).map(([key, value]) => (
+              <div key={key}>
+                <b>{key}: </b>
+                {value}
+              </div>
+            ))}
+          </div>
+          <Divider />
+          <UpdateHighestScore spaceNum={num} />
+          <Divider />
+          <ChangeOwner spaceNum={num} />
+          <Divider />
+          <MoneyControl />
+        </>
+      );
       break;
     case "Go":
       // TODO
+      component = (
+        <>
+          <div className={classes.section}>
+            <b>種類: </b>Go格
+          </div>
+        </>
+      );
       break;
     case "chance":
-      component = <MoneyControl />;
+      component = (
+        <>
+          <div className={classes.section}>
+            <b>種類: </b>機會
+          </div>
+          <Divider />
+          <MoneyControl />
+        </>
+      );
       break;
     case "fate":
-      component = <MoneyControl />;
+      component = (
+        <>
+          <div className={classes.section}>
+            <b>種類: </b>命運
+          </div>
+          <Divider />
+          <MoneyControl />
+        </>
+      );
       break;
     case "see-prison":
+      component = (
+        <>
+          <div className={classes.section}>
+            <b>種類: </b>探監
+          </div>
+        </>
+      );
       break;
     case "go-prison":
+      component = (
+        <>
+          <div className={classes.section}>
+            <b>種類: </b>入獄
+          </div>
+        </>
+      );
       break;
     case "event":
       // TODO
+      component = (
+        <>
+          <div className={classes.section}>
+            <b>種類: </b>事件格
+          </div>
+        </>
+      );
       break;
     case "store":
-      component = <MoneyControl />;
+      component = (
+        <>
+          <div className={classes.section}>
+            <b>種類: </b>商店
+          </div>
+          <Divider />
+          <MoneyControl />
+        </>
+      );
       break;
     default:
       console.error(`Invalid space type: ${type}`);

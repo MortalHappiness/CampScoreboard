@@ -19,7 +19,7 @@ import SpacesList from "./features/spaces";
 import NotificationList from "./features/notifications";
 import LoginForm from "./app/Login";
 
-import MoneyControl from "./app/admin/MoneyControl";
+import MoneyControl from "./app/control/MoneyControl";
 import UseCards from "./app/admin/UseCards";
 import SetOccupation from "./app/admin/SetOccupation";
 

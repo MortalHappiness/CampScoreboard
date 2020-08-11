@@ -64,6 +64,7 @@ module.exports = () => {
         if (space.type === "Go") {
           space.costs = space.values;
           delete space.values;
+          space.level = 0;
         }
         if (space.type === "special-building") {
           space.costs = [space.cost];

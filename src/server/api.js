@@ -45,11 +45,128 @@ async function updateOccupation(io, { playerId, occupation }) {
     { id: playerId },
     { _id: false, __v: false }
   ).exec();
-  if (player) {
+  if (playerUpdate) {
     io.emit("UPDATE_PLAYERS", [playerUpdate]);
   }
 
   return true;
+}
+
+async function updateHighestScore(io, { spaceNum, highestScore }) {
+  const space = await model.Space.findOneAndUpdate(
+    { num: spaceNum },
+    { $set: { highestScore } }
+  ).exec();
+
+  if (!space) return false;
+
+  // Broadcast space update
+  const spaceUpdate = await model.Space.findOne(
+    { num: spaceNum },
+    { _id: false, __v: false }
+  ).exec();
+  if (space) {
+    io.emit("UPDATE_SPACES", [spaceUpdate]);
+  }
+
+  return true;
+}
+
+async function changeOwner(io, { spaceNum, playerId }) {
+  // Find owners and update space owner
+
+  const newOwner = await model.Player.findOne(
+    { id: playerId },
+    { _id: false, __v: false }
+  ).exec();
+  if (!newOwner) return false;
+
+  const space = await model.Space.findOneAndUpdate(
+    { num: spaceNum },
+    { $set: { ownedBy: newOwner.name } }
+  ).exec();
+  if (!space) return false;
+
+  const origPlayerName = space.ownedBy;
+  const origOwner = await model.Player.findOne(
+    { name: origPlayerName },
+    { _id: false, __v: false }
+  ).exec();
+
+  const value = space.costs[0];
+
+  // ========================================
+  // Update scores
+
+  await model.Player.findOneAndUpdate(
+    { name: origPlayerName },
+    { $inc: { score: -value } }
+  ).exec();
+  await model.Player.findOneAndUpdate(
+    { id: playerId },
+    { $inc: { score: value } }
+  ).exec();
+
+  // ========================================
+
+  // Broadcast space update
+  const spaceUpdate = await model.Space.findOne(
+    { num: spaceNum },
+    { _id: false, __v: false }
+  ).exec();
+  if (space) {
+    io.emit("UPDATE_SPACES", [spaceUpdate]);
+  }
+
+  // Broadcast players update
+  const playersUpdate = [];
+  const origOwnerUpdate = await model.Player.findOne(
+    { name: origPlayerName },
+    { _id: false, __v: false }
+  ).exec();
+  if (origOwnerUpdate) {
+    playersUpdate.push(origOwnerUpdate);
+  }
+  const newOwnerUpdate = await model.Player.findOne(
+    { id: playerId },
+    { _id: false, __v: false }
+  ).exec();
+  if (newOwnerUpdate) {
+    playersUpdate.push(newOwnerUpdate);
+  }
+  if (playersUpdate.length) {
+    io.emit("UPDATE_PLAYERS", playersUpdate);
+  }
+
+  return true;
+}
+
+// ========================================
+
+// Now we have two permissions: "admin" and "npc"
+// All npcs have same permission
+function verifyPermission(name, permissions) {
+  if (typeof name != "string") return false;
+
+  let hasPermission = false;
+
+  permissions.forEach((permission) => {
+    switch (permission) {
+      case "admin":
+        if (name === permission) {
+          hasPermission = true;
+        }
+        break;
+      case "npc":
+        if (name.startsWith("npc")) {
+          hasPermission = true;
+        }
+        break;
+      default:
+        console.error("Invalid permission type");
+    }
+  });
+  return hasPermission;
 }
 
 // ========================================
@@ -119,7 +236,7 @@ router.put(
       res.status(403).end();
       return;
     }
-    if (name !== "admin" && !name.startsWith("npc")) {
+    if (!verifyPermission(name, ["admin", "npc"])) {
       res.status(403).end();
       return;
     }
@@ -173,7 +290,8 @@ router.put(
   "/occupation",
   express.json({ strict: false }),
   asyncHandler(async (req, res, next) => {
-    if (req.session.name !== "admin") {
+    const { name } = req.session;
+    if (!verifyPermission(name, ["admin"])) {
       res.status(403).end();
       return;
     }
@@ -192,6 +310,66 @@ router.put(
 
     const { io } = req.app.locals;
     const isSuccess = await updateOccupation(io, { playerId, occupation });
+    if (!isSuccess) {
+      res.status(400).end();
+      return;
+    }
+
+    res.status(204).end();
+  })
+);
+
+// Update highest score of game space
+router.put(
+  "/highestscore",
+  express.json({ strict: false }),
+  asyncHandler(async (req, res, next) => {
+    const { name } = req.session;
+    if (!verifyPermission(name, ["admin", "npc"])) {
+      res.status(403).end();
+      return;
+    }
+
+    const { spaceNum, highestScore } = req.body;
+    if (
+      typeof spaceNum !== "number" ||
+      typeof highestScore !== "number" ||
+      highestScore < 0
+    ) {
+      res.status(400).end();
+      return;
+    }
+
+    const { io } = req.app.locals;
+    const isSuccess = await updateHighestScore(io, { spaceNum, highestScore });
+    if (!isSuccess) {
+      res.status(400).end();
+      return;
+    }
+
+    res.status(204).end();
+  })
+);
+
+// Change the owner of space
+router.put(
+  "/owner",
+  express.json({ strict: false }),
+  asyncHandler(async (req, res, next) => {
+    const { name } = req.session;
+    if (!verifyPermission(name, ["admin", "npc"])) {
+      res.status(403).end();
+      return;
+    }
+
+    const { spaceNum, playerId } = req.body;
+    if (typeof spaceNum !== "number" || typeof playerId !== "number") {
+      res.status(400).end();
+      return;
+    }
+
+    const { io } = req.app.locals;
+    const isSuccess = await changeOwner(io, { spaceNum, playerId });
     if (!isSuccess) {
       res.status(400).end();
       return;
