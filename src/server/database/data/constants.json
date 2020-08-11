@@ -1,0 +1,5 @@
+{
+  "OCCUPATIONS": ["occ1", "occ2", "occ3"],
+  "INITIAL_MONEY": 100000,
+  "BUILDING_SCORE_RATIO": 0.6
+}

@@ -190,7 +190,7 @@ const spaceDetail = (space) => {
     case "Go":
       dialogContent = {
         種類: "Go格",
-        目前經過獲得金錢: costs[0],
+        目前經過獲得金錢: costs[level],
       };
       break;
     case "chance":

@@ -4,11 +4,13 @@ const bcrypt = require("bcrypt");
 
 const model = require("./database/mongo/model");
 
-const occupations = require("./database/data/occupations.json");
+const CONSTANTS = require("./database/data/constants.json");
 
 // ========================================
 
 const router = express.Router();
+
+const { OCCUPATIONS } = CONSTANTS;
 
 // ========================================
 
@@ -30,6 +32,14 @@ async function updateMoney(io, { playerId, moneyChange }) {
   }
 
   return true;
+}
+
+async function giveGoMoney(io, { playerId }) {
+  const goSpace = await model.Space.findOne({ type: "Go" }).exec();
+  const { level, costs } = goSpace;
+  const moneyChange = costs[level];
+
+  return await updateMoney(io, { playerId, moneyChange });
 }
 
 async function updateOccupation(io, { playerId, occupation }) {
@@ -88,11 +98,6 @@ async function changeOwner(io, { spaceNum, playerId }) {
   if (!space) return false;
 
   const origPlayerName = space.ownedBy;
-  const origOwner = await model.Player.findOne(
-    { name: origPlayerName },
-    { _id: false, __v: false }
-  ).exec();
-
   const value = space.costs[0];
 
   // ========================================
@@ -281,7 +286,7 @@ router.get(
 router.get(
   "/occupations",
   asyncHandler(async (req, res, next) => {
-    res.send(occupations);
+    res.send(OCCUPATIONS);
   })
 );
 
@@ -302,7 +307,7 @@ router.put(
       !occupation ||
       typeof playerId !== "number" ||
       typeof occupation !== "string" ||
-      !occupations.includes(occupation)
+      !OCCUPATIONS.includes(occupation)
     ) {
       res.status(400).end();
       return;
@@ -370,6 +375,38 @@ router.put(
 
     const { io } = req.app.locals;
     const isSuccess = await changeOwner(io, { spaceNum, playerId });
+    if (!isSuccess) {
+      res.status(400).end();
+      return;
+    }
+
+    res.status(204).end();
+  })
+);
+
+// Give a player "Go" money
+router.put(
+  "/give-go-money",
+  express.json({ strict: false }),
+  asyncHandler(async (req, res, next) => {
+    const { name } = req.session;
+    if (!name || typeof name !== "string") {
+      res.status(403).end();
+      return;
+    }
+    if (!verifyPermission(name, ["admin", "npc"])) {
+      res.status(403).end();
+      return;
+    }
+
+    const { playerId } = req.body;
+    if (typeof playerId !== "number") {
+      res.status(400).end();
+      return;
+    }
+
+    const { io } = req.app.locals;
+    const isSuccess = await giveGoMoney(io, { playerId });
     if (!isSuccess) {
       res.status(400).end();
       return;

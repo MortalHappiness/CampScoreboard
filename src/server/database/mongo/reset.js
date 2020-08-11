@@ -9,11 +9,15 @@ const players = require("../data/players.json");
 const spaces = require("../data/spaces.json");
 const accounts = require("../data/accounts.json");
 
+const CONSTANTS = require("../data/constants.json");
+
 // ========================================
 
 require("dotenv").config({ path: path.resolve(__dirname, "../../../../.env") });
 
 const { MONGO_HOST, MONGO_DB_NAME } = process.env;
+
+const { INITIAL_MONEY } = CONSTANTS;
 
 const saltRounds = 10;
 
@@ -38,8 +42,8 @@ module.exports = () => {
     // Save all players
     await Promise.all(
       players.map(async (player) => {
-        player.money = 15000;
-        player.score = 15000;
+        player.money = INITIAL_MONEY;
+        player.score = INITIAL_MONEY;
         const playerDocument = new model.Player(player);
         await playerDocument.save();
       })

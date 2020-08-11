@@ -44,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function ChangeOwner({ spaceNum }) {
+export default function ChangeOwner() {
   const classes = useStyles();
   const [players, setPlayers] = useState(null);
 
@@ -100,11 +100,10 @@ export default function ChangeOwner({ spaceNum }) {
       if (isSending) return;
       setIsSending(true);
       try {
-        const res = await fetch("/api/owner", {
+        const res = await fetch("/api/give-go-money", {
           method: "PUT",
           body: JSON.stringify({
             playerId: Number(state.team),
-            spaceNum,
           }),
           headers: {
             "content-type": "application/json",
@@ -123,7 +122,7 @@ export default function ChangeOwner({ spaceNum }) {
         setState({ ...state, moneyChange: "" });
       }
     },
-    [isSending, spaceNum, state]
+    [isSending, state]
   );
 
   // ========================================
@@ -133,7 +132,7 @@ export default function ChangeOwner({ spaceNum }) {
       <CssBaseline />
       <div className={classes.paper}>
         <Typography component="h1" variant="h5">
-          Change Owner
+          Give Go Money
         </Typography>
         <form className={classes.form} onSubmit={handleSubmit}>
           <FormControl

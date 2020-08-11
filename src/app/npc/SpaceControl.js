@@ -13,6 +13,7 @@ import NoPermission from "../NoPermission";
 import MoneyControl from "../control/MoneyControl";
 import UpdateHighestScore from "../control/UpdateHighestScore";
 import ChangeOwner from "../control/ChangeOwner";
+import GiveGoMoney from "../control/GiveGoMoney";
 
 // ========================================
 
@@ -31,6 +32,20 @@ const WrappedTypography = ({ text }) => (
     </Typography>
   </div>
 );
+
+const Information = ({ data }) => {
+  const classes = useStyles();
+  return (
+    <div className={classes.section}>
+      {Object.entries(data).map(([key, value]) => (
+        <div key={key}>
+          <b>{key}: </b>
+          {value}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 // ========================================
 
@@ -51,8 +66,9 @@ export default function SpaceControl() {
 
   // ========================================
 
-  let component;
-  const { type, name, num, ownedBy, costs, taxes, highestScore } = space;
+  let component, information;
+  const { type, name, num, ownedBy, costs, taxes, level, highestScore } = space;
+
   switch (type) {
     case "building":
       // TODO
@@ -75,8 +91,7 @@ export default function SpaceControl() {
       );
       break;
     case "game":
-      // TODO
-      const information = {
+      information = {
         種類: "遊戲格",
         擁有者: ownedBy || "N/A",
         價值: costs[0],
@@ -84,14 +99,7 @@ export default function SpaceControl() {
       };
       component = (
         <>
-          <div className={classes.section}>
-            {Object.entries(information).map(([key, value]) => (
-              <div key={key}>
-                <b>{key}: </b>
-                {value}
-              </div>
-            ))}
-          </div>
+          <Information data={information} />
           <Divider />
           <UpdateHighestScore spaceNum={num} />
           <Divider />
@@ -102,12 +110,15 @@ export default function SpaceControl() {
       );
       break;
     case "Go":
-      // TODO
+      information = {
+        種類: "Go格",
+        目前經過獲得金錢: costs[level],
+      };
       component = (
         <>
-          <div className={classes.section}>
-            <b>種類: </b>Go格
-          </div>
+          <Information data={information} />
+          <Divider />
+          <GiveGoMoney />
         </>
       );
       break;
