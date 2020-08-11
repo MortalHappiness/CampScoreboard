@@ -15,19 +15,22 @@ const { OCCUPATIONS } = CONSTANTS;
 // ========================================
 
 async function updateMoney(io, { playerId, moneyChange }) {
-  const player = await model.Player.findOneAndUpdate(
-    { id: playerId },
-    { $inc: { money: moneyChange, score: moneyChange } }
-  ).exec();
-
+  const player = await model.Player.findOne({ id: playerId }).exec();
   if (!player) return false;
+
+  const moneyInc =
+    player.money + moneyChange >= 0 ? moneyChange : -player.money;
+  await model.Player.findOneAndUpdate(
+    { id: playerId },
+    { $inc: { money: moneyInc, score: moneyInc } }
+  ).exec();
 
   // Broadcast player update
   const playerUpdate = await model.Player.findOne(
     { id: playerId },
     { _id: false, __v: false }
   ).exec();
-  if (player) {
+  if (playerUpdate) {
     io.emit("UPDATE_PLAYERS", [playerUpdate]);
   }
 
