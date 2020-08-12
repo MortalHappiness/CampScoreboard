@@ -14,6 +14,129 @@ const { OCCUPATIONS, BUILDING_SCORE_RATIO } = CONSTANTS;
 
 // ========================================
 
+async function recalculateScore(playerId) {
+  const player = await model.Player.findOne({ id: playerId }).exec();
+  let score = player.money;
+
+  const games = await model.Space.find({
+    ownedBy: player.name,
+    type: "game",
+  }).exec();
+  games.forEach((game) => {
+    score += game.costs[0];
+  });
+
+  const buildings = await model.Space.find({
+    ownedBy: player.name,
+    type: "building",
+  }).exec();
+  buildings.forEach((building) => {
+    const { costs, level } = building;
+    const cost = costs.slice(0, level).reduce((a, b) => a + b, 0);
+    score += cost * BUILDING_SCORE_RATIO;
+  });
+
+  const specialBuildings = await model.Space.find({
+    ownedBy: player.name,
+    type: "special-building",
+  }).exec();
+  specialBuildings.forEach((specialBuilding) => {
+    score += specialBuilding.costs[0] * BUILDING_SCORE_RATIO;
+  });
+
+  score = Math.floor(score);
+
+  await model.Player.findOneAndUpdate(
+    { id: playerId },
+    { $set: { score } }
+  ).exec();
+
+  // return changed players' Ids
+  return [playerId];
+}
+
+async function recalculateShouldDouble(spaceNum) {
+  const space = await model.Space.findOne({ num: spaceNum }).exec();
+  if (!space) return [];
+  if (space.type !== "building") return [];
+  const { suite, ownedBy, shouldDouble } = space;
+
+  const sameSuiteBuildings = await model.Space.find({ suite }).exec();
+  const newShouldDouble = sameSuiteBuildings.every(
+    (building) => building.ownedBy === ownedBy
+  );
+
+  if (shouldDouble === newShouldDouble) return [];
+
+  await model.Space.updateMany(
+    { suite },
+    { shouldDouble: newShouldDouble }
+  ).exec();
+
+  // return changed spaces' nums
+  return sameSuiteBuildings.map((building) => building.num);
+}
+
+// Currently update all spacial-buildings no matter they are changed or not
+// Maybe can be optimized in the future
+async function recalculateMultiple() {
+  const ownCounts = await model.Space.aggregate([
+    { $match: { type: "special-building" } },
+    {
+      $group: {
+        _id: "$ownedBy",
+        count: { $sum: 1 },
+      },
+    },
+  ]).exec();
+
+  await Promise.all(
+    ownCounts.map(async (ownCount) => {
+      const { _id: ownedBy, count: multiple } = ownCount;
+      if (ownedBy === "") return;
+      await model.Space.updateMany(
+        { type: "special-building", ownedBy },
+        { multiple }
+      ).exec();
+    })
+  );
+
+  // return changed spaces' nums
+  const spaces = await model.Space.find({
+    type: "special-building",
+    ownedBy: { $ne: "" },
+  }).exec();
+  return spaces.map((space) => space.num);
+}
+
+async function broadcastPlayersChange(io, playerIds) {
+  let playersUpdate = await Promise.all(
+    playerIds.map(
+      async (id) =>
+        await model.Player.findOne({ id }, { _id: false, __v: false }).exec()
+    )
+  );
+  playersUpdate = playersUpdate.filter((x) => Boolean(x));
+  if (playersUpdate.length) {
+    io.emit("UPDATE_PLAYERS", playersUpdate);
+  }
+}
+
+async function broadcastSpacesChange(io, spaceNums) {
+  let spacesUpdate = await Promise.all(
+    spaceNums.map(
+      async (num) =>
+        await model.Space.findOne({ num }, { _id: false, __v: false }).exec()
+    )
+  );
+  spacesUpdate = spacesUpdate.filter((x) => Boolean(x));
+  if (spacesUpdate.length) {
+    io.emit("UPDATE_SPACES", spacesUpdate);
+  }
+}
+
+// ========================================
+
 async function updateMoney(io, { playerId, moneyChange }) {
   const player = await model.Player.findOne({ id: playerId }).exec();
   if (!player) return false;
@@ -25,14 +148,7 @@ async function updateMoney(io, { playerId, moneyChange }) {
     { $inc: { money: moneyInc, score: moneyInc } }
   ).exec();
 
-  // Broadcast player update
-  const playerUpdate = await model.Player.findOne(
-    { id: playerId },
-    { _id: false, __v: false }
-  ).exec();
-  if (playerUpdate) {
-    io.emit("UPDATE_PLAYERS", [playerUpdate]);
-  }
+  await broadcastPlayersChange(io, [playerId]);
 
   return true;
 }
@@ -50,17 +166,9 @@ async function updateOccupation(io, { playerId, occupation }) {
     { id: playerId },
     { $set: { occupation } }
   ).exec();
-
   if (!player) return false;
 
-  // Broadcast player update
-  const playerUpdate = await model.Player.findOne(
-    { id: playerId },
-    { _id: false, __v: false }
-  ).exec();
-  if (playerUpdate) {
-    io.emit("UPDATE_PLAYERS", [playerUpdate]);
-  }
+  await broadcastPlayersChange(io, [playerId]);
 
   return true;
 }
@@ -73,25 +181,17 @@ async function updateHighestScore(io, { spaceNum, highestScore }) {
 
   if (!space) return false;
 
-  // Broadcast space update
-  const spaceUpdate = await model.Space.findOne(
-    { num: spaceNum },
-    { _id: false, __v: false }
-  ).exec();
-  if (space) {
-    io.emit("UPDATE_SPACES", [spaceUpdate]);
-  }
+  await broadcastSpacesChange(io, [spaceNum]);
 
   return true;
 }
 
 async function changeOwner(io, { spaceNum, playerId }) {
-  // Find owners and update space owner
+  const updatedPlayerIds = new Set([playerId]);
+  const updatedSpaceNums = new Set([spaceNum]);
 
-  const newOwner = await model.Player.findOne(
-    { id: playerId },
-    { _id: false, __v: false }
-  ).exec();
+  // Find owners and update space owner
+  const newOwner = await model.Player.findOne({ id: playerId }).exec();
   if (!newOwner) return false;
 
   const space = await model.Space.findOneAndUpdate(
@@ -99,268 +199,144 @@ async function changeOwner(io, { spaceNum, playerId }) {
     { $set: { ownedBy: newOwner.name } }
   ).exec();
   if (!space) return false;
-  const { type } = space;
-  if (type !== "game" && type !== "building" && type !== "special-building") {
+  if (!["game", "building", "special-building"].includes(space.type))
     return false;
-  }
 
-  const origPlayerName = space.ownedBy;
+  const oldOwner = await model.Player.findOne({ name: space.ownedBy }).exec();
 
-  let spaceValue;
-  if (type === "game") {
-    spaceValue = space.costs[0];
-  } else if (type === "special-building") {
-    spaceValue = space.costs[0] * BUILDING_SCORE_RATIO;
-  } else {
-    // building
-    const currentBuildingValue = space.costs
-      .slice(0, space.level)
-      .reduce((a, b) => a + b, 0);
-    spaceValue = currentBuildingValue * BUILDING_SCORE_RATIO;
-  }
-
-  // ========================================
   // Update scores
-
-  await model.Player.findOneAndUpdate(
-    { name: origPlayerName },
-    { $inc: { score: -spaceValue } }
-  ).exec();
-  await model.Player.findOneAndUpdate(
-    { id: playerId },
-    { $inc: { score: spaceValue } }
-  ).exec();
-
-  // ========================================
-  // Deal with space attributes change
-
-  let updatedSpacesNums = [spaceNum];
-
-  if (type === "building") {
-    // Check suite
-    const { suite } = space;
-    const sameSuiteSpaces = await model.Space.find(
-      { suite },
-      "num ownedBy"
-    ).exec();
-    const ownedByFirst = sameSuiteSpaces[0].ownedBy;
-    const shouldDouble = sameSuiteSpaces.every(
-      (space) => space.ownedBy === ownedByFirst
-    );
-    await model.Space.updateMany({ suite }, { shouldDouble }).exec();
-    updatedSpacesNums = sameSuiteSpaces.map((space) => space.num);
-  } else if (type === "special-building") {
-    // Update multiple
-    const specialBuildingsNewOwner = await model.Space.find(
-      { ownedBy: newOwner.name },
-      "num"
-    ).exec();
-    await model.Space.updateMany(
-      { ownedBy: newOwner.name },
-      { multiple: specialBuildingsNewOwner.length }
-    ).exec();
-    specialBuildingsNewOwner.forEach((space) => {
-      const { num } = space;
-      if (!updatedSpacesNums.includes(num)) {
-        updatedSpacesNums.push(num);
-      }
+  let changedPlayerIds;
+  if (oldOwner) {
+    changedPlayerIds = await recalculateScore(oldOwner.id);
+    changedPlayerIds.forEach((playerId) => {
+      updatedPlayerIds.add(playerId);
     });
-
-    const specialBuildingsOrigOwner = await model.Space.find(
-      { ownedBy: origPlayerName },
-      "num"
-    ).exec();
-    await model.Space.updateMany(
-      { ownedBy: origPlayerName },
-      { multiple: specialBuildingsOrigOwner.length }
-    ).exec();
-    specialBuildingsOrigOwner.forEach((space) => {
-      const { num } = space;
-      if (!updatedSpacesNums.includes(num)) {
-        updatedSpacesNums.push(num);
-      }
+  }
+  if (newOwner) {
+    changedPlayerIds = await recalculateScore(newOwner.id);
+    changedPlayerIds.forEach((playerId) => {
+      updatedPlayerIds.add(playerId);
     });
   }
 
-  // ========================================
+  // handle space attributes change
+  let changedSpaceNums;
 
-  // Broadcast spaces update
-  const updatedSpaces = await Promise.all(
-    updatedSpacesNums.map(
-      async (num) =>
-        await model.Space.findOne({ num }, { _id: false, __v: false }).exec()
-    )
-  );
-  if (updatedSpaces) {
-    io.emit("UPDATE_SPACES", updatedSpaces);
+  if (space.type === "building") {
+    changedSpaceNums = await recalculateShouldDouble(spaceNum);
+    changedSpaceNums.forEach((spaceNum) => {
+      updatedSpaceNums.add(spaceNum);
+    });
+  } else if (space.type === "special-building") {
+    changedSpaceNums = await recalculateMultiple(spaceNum);
+    changedSpaceNums.forEach((spaceNum) => {
+      updatedSpaceNums.add(spaceNum);
+    });
   }
 
   // Broadcast players update
-  const playersUpdate = [];
-  const origOwnerUpdate = await model.Player.findOne(
-    { name: origPlayerName },
-    { _id: false, __v: false }
-  ).exec();
-  if (origOwnerUpdate) {
-    playersUpdate.push(origOwnerUpdate);
-  }
-  const newOwnerUpdate = await model.Player.findOne(
-    { id: playerId },
-    { _id: false, __v: false }
-  ).exec();
-  if (newOwnerUpdate) {
-    playersUpdate.push(newOwnerUpdate);
-  }
-  if (playersUpdate.length) {
-    io.emit("UPDATE_PLAYERS", playersUpdate);
-  }
+  await broadcastPlayersChange(io, [...updatedPlayerIds]);
+
+  // Broadcast spaces update
+  await broadcastSpacesChange(io, [...updatedSpaceNums]);
 
   return true;
 }
 
 async function buySpace(io, { spaceNum, playerId }) {
-  // Find space and player
+  const updatedSpaceNums = new Set([spaceNum]);
 
+  // Find space and player
   const space = await model.Space.findOne({ num: spaceNum }).exec();
   if (!space) return false;
-  const { type } = space;
-  if (type !== "building" && type !== "special-building") return false;
+  if (!["building", "special-building"].includes(space.type)) return false;
   if (space.ownedBy) return false;
   const cost = space.costs[0];
 
   const player = await model.Player.findOne({ id: playerId }).exec();
   if (!player) return false;
 
-  // ========================================
   // Buy the space
-
   if (player.money < cost) {
     throw new Error("Do not have enough money!");
   }
-
   await model.Player.findOneAndUpdate(
     { id: playerId },
-    {
-      $inc: {
-        money: -cost,
-        score: Math.floor(cost * (BUILDING_SCORE_RATIO - 1)),
-      },
-    }
+    { $inc: { money: -cost } }
   ).exec();
 
-  // ========================================
-  // Deal with space attributes change
-
-  let updatedSpacesNums = [spaceNum];
-
-  if (type === "building") {
-    const { suite } = space;
+  // Handle space attributes change
+  let changedSpaceNums;
+  if (space.type === "building") {
     await model.Space.findOneAndUpdate(
       { num: spaceNum },
       { $set: { level: 1, ownedBy: player.name } }
     ).exec();
-
-    // Check suite
-    const sameSuiteSpaces = await model.Space.find(
-      { suite },
-      "num ownedBy"
-    ).exec();
-    if (sameSuiteSpaces.every((space) => space.ownedBy === player.name)) {
-      await model.Space.updateMany({ suite }, { shouldDouble: true }).exec();
-      updatedSpacesNums = sameSuiteSpaces.map((space) => space.num);
-    }
-  } else {
-    // special-building
+    changedSpaceNums = await recalculateShouldDouble(spaceNum);
+    changedSpaceNums.forEach((spaceNum) => {
+      updatedSpaceNums.add(spaceNum);
+    });
+  } else if (space.type === "special-building") {
     await model.Space.findOneAndUpdate(
       { num: spaceNum },
       { $set: { ownedBy: player.name } }
     ).exec();
-
-    // Update multiple
-    const specialBuildings = await model.Space.find(
-      { ownedBy: player.name },
-      "num"
-    ).exec();
-    await model.Space.updateMany(
-      { ownedBy: player.name },
-      { multiple: specialBuildings.length }
-    ).exec();
-    updatedSpacesNums = specialBuildings.map((space) => space.num);
+    changedSpaceNums = await recalculateMultiple(spaceNum);
+    changedSpaceNums.forEach((spaceNum) => {
+      updatedSpaceNums.add(spaceNum);
+    });
   }
 
-  // ========================================
+  // Update scores
+  const updatedPlayerIds = await recalculateScore(playerId);
 
   // Broadcast spaces update
-  const updatedSpaces = await Promise.all(
-    updatedSpacesNums.map(
-      async (num) =>
-        await model.Space.findOne({ num }, { _id: false, __v: false }).exec()
-    )
-  );
-  if (updatedSpaces) {
-    io.emit("UPDATE_SPACES", updatedSpaces);
-  }
+  await broadcastSpacesChange(io, [...updatedSpaceNums]);
 
   // Broadcast players update
-  const playerUpdate = await model.Player.findOne(
-    { id: playerId },
-    { _id: false, __v: false }
-  ).exec();
-  if (playerUpdate) {
-    io.emit("UPDATE_PLAYERS", [playerUpdate]);
-  }
+  await broadcastPlayersChange(io, [...updatedPlayerIds]);
 
   return true;
 }
 
 async function upgradeSpace(io, { spaceNum, shouldPay }) {
+  // Find space and owner
   const space = await model.Space.findOne({ num: spaceNum }).exec();
   if (!space) return false;
   const { type, level, ownedBy, costs } = space;
-  const cost = costs[level];
   if (type !== "building") return false;
   if (level !== 1 && level !== 2) return false;
+  const cost = costs[level];
 
-  const player = await model.Player.findOne({ name: ownedBy }).exec();
-  if (!player) return false;
+  const owner = await model.Player.findOne({ name: ownedBy }).exec();
+  if (!owner) return false;
 
-  if (shouldPay && player.money < cost) {
+  // Upgrade and pay
+  if (shouldPay && owner.money < cost) {
     throw new Error("Do not have enough money!");
   }
 
+  const updatedSpaceNums = [spaceNum];
   await model.Space.findOneAndUpdate(
     { num: spaceNum },
     { $inc: { level: 1 } }
   ).exec();
 
-  // Broadcast space update
-  const spaceUpdate = await model.Space.findOne(
-    { num: spaceNum },
-    { _id: false, __v: false }
-  ).exec();
-  if (space) {
-    io.emit("UPDATE_SPACES", [spaceUpdate]);
-  }
-
   if (shouldPay) {
     await model.Player.findOneAndUpdate(
-      { name: ownedBy },
-      {
-        $inc: {
-          money: -cost,
-          score: Math.floor(cost * (BUILDING_SCORE_RATIO - 1)),
-        },
-      }
+      { id: owner.id },
+      { $inc: { money: -cost } }
     ).exec();
-    // Broadcast players update
-    const playerUpdate = await model.Player.findOne(
-      { name: ownedBy },
-      { _id: false, __v: false }
-    ).exec();
-    if (playerUpdate) {
-      io.emit("UPDATE_PLAYERS", [playerUpdate]);
-    }
   }
+
+  // Update scores
+  const updatedPlayerIds = await recalculateScore(owner.id);
+
+  // Broadcast spaces update
+  await broadcastSpacesChange(io, [...updatedSpaceNums]);
+
+  // Broadcast players update
+  await broadcastPlayersChange(io, [...updatedPlayerIds]);
 
   return true;
 }
