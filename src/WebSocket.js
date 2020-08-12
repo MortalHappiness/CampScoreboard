@@ -10,6 +10,7 @@ import {
 import { sessionUpdated } from "./features/session/sessionSlice";
 import { spacesUpdated } from "./features/spaces/spaceSlice";
 import { playersUpdated } from "./features/scoreboard/playerSlice";
+import { notificationsUpdated } from "./features/notifications/notificationSlice";
 
 // ========================================
 
@@ -55,6 +56,10 @@ export default ({ children }) => {
 
     socket.on("UPDATE_SPACES", (data) => {
       dispatch(spacesUpdated(data));
+    });
+
+    socket.on("UPDATE_NOTIFICATIONS", (data) => {
+      dispatch(notificationsUpdated(data));
     });
 
     ws = { socket };

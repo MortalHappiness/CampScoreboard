@@ -8,6 +8,7 @@ const model = require("./model");
 const players = require("../data/players.json");
 const spaces = require("../data/spaces.json");
 const accounts = require("../data/accounts.json");
+const notifications = require("../data/notifications.json");
 
 const CONSTANTS = require("../data/constants.json");
 
@@ -49,6 +50,16 @@ module.exports = () => {
       })
     );
     console.log("All players are saved.");
+
+    // Save all notifications
+    await Promise.all(
+      notifications.map(async (notification) => {
+        notification.time = new Date().toISOString();
+        const notificationDocument = new model.Notification(notification);
+        await notificationDocument.save();
+      })
+    );
+    console.log("All notifications are saved.");
 
     // Save all spaces
     await Promise.all(

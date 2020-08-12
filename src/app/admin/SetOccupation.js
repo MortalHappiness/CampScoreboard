@@ -4,6 +4,7 @@ import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
+import Typography from "@material-ui/core/Typography";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import InputLabel from "@material-ui/core/InputLabel";
 import FormControl from "@material-ui/core/FormControl";
@@ -143,6 +144,9 @@ export default function SetOccupation() {
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
+        <Typography variant="h5" component="h1">
+          Set Occupation
+        </Typography>
         <form className={classes.form} onSubmit={handleSubmit}>
           <FormControl
             className={classes.formControl}

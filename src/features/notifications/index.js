@@ -1,57 +1,72 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import clsx from "clsx";
 import { formatDistanceToNow, parseISO } from "date-fns";
 
-// Direct import css for now
-// TODO: change it
-import "./style.css";
+import { makeStyles } from "@material-ui/core/styles";
+
+import {
+  selectAllNotifications,
+  allNotificationsRead,
+} from "./notificationSlice";
 
 // ========================================
 
-const notifications = [
-  {
-    id: "1",
-    date: "2020-08-01T16:54:10.497Z",
-    message: "hi",
-    isNew: true,
+const useStyles = makeStyles({
+  notification: {
+    border: "1px solid #ccc",
+    padding: "0.5rem",
+    borderTop: "none",
   },
-  {
-    id: "2",
-    date: "2020-07-21T16:54:10.497Z",
-    message: "hello",
-    isNew: false,
+  notificationList: {
+    textAlign: "left",
   },
-  {
-    id: "3",
-    date: "2020-06-12T16:54:10.497Z",
-    message: "old",
-    isNew: false,
+  isNew: {
+    backgroundColor: "rgba(29, 161, 242, 0.1)",
   },
-];
+  timeAgo: {
+    color: "#777",
+  },
+});
 
-export default function NotificationList() {
-  const renderedNotifications = notifications.map((notification) => {
-    const date = parseISO(notification.date);
-    const timeAgo = formatDistanceToNow(date);
+// ========================================
 
-    const notificationClassname = clsx(
-      "notification",
-      notification.isNew && "new"
-    );
+const Notification = ({ data }) => {
+  const classes = useStyles();
 
-    return (
-      <div key={notification.id} className={notificationClassname}>
-        <div>
-          <b>{notification.message}</b>
-        </div>
-        <div title={notification.date}>
-          <i>{timeAgo} ago</i>
-        </div>
-      </div>
-    );
-  });
+  const { title, content, time, read } = data;
+  const timeAgo = formatDistanceToNow(parseISO(time));
+  const className = clsx(classes.notification, !read && classes.isNew);
 
   return (
-    <section className="notificationsList">{renderedNotifications}</section>
+    <div className={className}>
+      <div>
+        <b>{title}</b>
+      </div>
+      <div>{content}</div>
+      <div title={time}>
+        <i className={classes.timeAgo}>{timeAgo} ago</i>
+      </div>
+    </div>
+  );
+};
+
+export default function NotificationList() {
+  const classes = useStyles();
+  const dispatch = useDispatch();
+  const notifications = useSelector(selectAllNotifications);
+
+  useEffect(() => {
+    return () => {
+      dispatch(allNotificationsRead());
+    };
+  }, [dispatch]);
+
+  return (
+    <section className={classes.notificationList}>
+      {notifications.map((notification) => (
+        <Notification key={notification._id} data={notification} />
+      ))}
+    </section>
   );
 }

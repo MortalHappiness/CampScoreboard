@@ -97,8 +97,31 @@ const Account = mongoose.model("Account", accountSchema);
 
 // ========================================
 
+const notificationSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+    immutable: true,
+  },
+  content: {
+    type: String,
+    required: true,
+    immutable: true,
+  },
+  time: {
+    type: String,
+    required: true,
+    immutable: true,
+  },
+});
+
+const Notification = mongoose.model("Notification", notificationSchema);
+
+// ========================================
+
 module.exports = {
   Player,
   Space,
   Account,
+  Notification,
 };

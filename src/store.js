@@ -4,6 +4,7 @@ import socketReducer from "./features/socket/socketSlice";
 import sessionReducer from "./features/session/sessionSlice";
 import spaceReducer from "./features/spaces/spaceSlice";
 import playerReducer from "./features/scoreboard/playerSlice";
+import notificationReducer from "./features/notifications/notificationSlice";
 
 export default configureStore({
   reducer: {
@@ -11,5 +12,6 @@ export default configureStore({
     session: sessionReducer,
     spaces: spaceReducer,
     players: playerReducer,
+    notifications: notificationReducer,
   },
 });

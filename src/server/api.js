@@ -10,9 +10,23 @@ const CONSTANTS = require("./database/data/constants.json");
 
 const router = express.Router();
 
-const { OCCUPATIONS, BUILDING_SCORE_RATIO } = CONSTANTS;
+const { OCCUPATIONS, BUILDING_SCORE_RATIO, CARDS } = CONSTANTS;
 
 // ========================================
+
+async function addNotification(io, { title, content }) {
+  const time = new Date().toISOString();
+  const notification = { title, content, time };
+  const notificationDocument = new model.Notification(notification);
+  await notificationDocument.save();
+
+  console.log(notificationDocument);
+  console.log(await model.Notification.find({}).exec());
+
+  io.emit("UPDATE_NOTIFICATIONS", [notificationDocument]);
+
+  return;
+}
 
 async function recalculateScore(playerId) {
   const player = await model.Player.findOne({ id: playerId }).exec();
@@ -390,6 +404,36 @@ async function taxSomeOne(io, { spaceNum, playerId }) {
   return true;
 }
 
+async function useCard(io, { playerId, card }) {
+  console.log("useCard", card);
+
+  switch (card) {
+    case "均富卡":
+      await addNotification(io, {
+        title: "卡片：均富卡",
+        content: "第1小隊使用了均富卡，所有隊伍的現金平分",
+      });
+      break;
+    case "法槌卡":
+      await addNotification(io, {
+        title: "卡片：法槌卡",
+        content:
+          "第1小隊使用了法槌卡，當前最有錢小隊(第2小隊)損失1/4的現金($200)，第1小隊獲得其中一半的錢($100)",
+      });
+      break;
+    case "房稅卡":
+      await addNotification(io, {
+        title: "卡片：房稅卡",
+        content: "第1小隊使用了房稅卡，其他所有隊伍損失持有房產總價值20%的現金",
+      });
+      break;
+    default:
+      return false;
+  }
+
+  return true;
+}
+
 // ========================================
 // Now we have two permissions: "admin" and "npc"
 // All npcs have same permission
@@ -558,6 +602,56 @@ router.put(
 
     const { io } = req.app.locals;
     const isSuccess = await updateOccupation(io, { playerId, occupation });
+    if (!isSuccess) {
+      res.status(400).end();
+      return;
+    }
+
+    res.status(204).end();
+  })
+);
+
+// Get all cards
+router.get(
+  "/cards",
+  express.json({ strict: false }),
+  asyncHandler(async (req, res, next) => {
+    const { name } = req.session;
+    if (!name || typeof name !== "string") {
+      res.status(403).end();
+      return;
+    }
+    if (!verifyPermission(name, ["admin"])) {
+      res.status(403).end();
+      return;
+    }
+    res.send(CARDS);
+  })
+);
+
+// One player use card
+router.put(
+  "/card",
+  express.json({ strict: false }),
+  asyncHandler(async (req, res, next) => {
+    const { name } = req.session;
+    if (!verifyPermission(name, ["admin"])) {
+      res.status(403).end();
+      return;
+    }
+
+    const { playerId, card } = req.body;
+    if (
+      typeof playerId !== "number" ||
+      typeof card !== "string" ||
+      !CARDS.includes(card)
+    ) {
+      res.status(400).end();
+      return;
+    }
+
+    const { io } = req.app.locals;
+    const isSuccess = await useCard(io, { playerId, card });
     if (!isSuccess) {
       res.status(400).end();
       return;

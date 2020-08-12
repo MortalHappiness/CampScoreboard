@@ -18,6 +18,15 @@ function updatePlayers(socket) {
     .catch((e) => console.error(e));
 }
 
+function updateNotifications(socket) {
+  model.Notification.find({}, { __v: false })
+    .exec()
+    .then((data) => {
+      socket.emit("UPDATE_NOTIFICATIONS", data);
+    })
+    .catch((e) => console.error(e));
+}
+
 function updateSpaces(socket) {
   model.Space.find({}, { _id: false, __v: false })
     .exec()
@@ -33,6 +42,7 @@ module.exports = (io) => {
     updateSession(socket);
     updatePlayers(socket);
     updateSpaces(socket);
+    updateNotifications(socket);
     socket.on("disconnect", () => {
       console.log(`A user disconnected, id = ${socket.id}`);
     });

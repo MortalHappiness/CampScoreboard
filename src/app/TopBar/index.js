@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import clsx from "clsx";
 import {
   Switch,
@@ -17,6 +18,8 @@ import Badge from "@material-ui/core/Badge";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 
 import MenuButtonDrawer from "./menu";
+
+import { selectAllNotifications } from "../../features/notifications/notificationSlice";
 
 // ========================================
 
@@ -64,6 +67,9 @@ const NotificationButtonLink = () => {
   const classes = useStyles();
   const match = pathname === "/notifications";
 
+  const notifications = useSelector(selectAllNotifications);
+  const numUnreadNotifications = notifications.filter((n) => !n.read).length;
+
   const handleOnClick = () => {
     if (!match) {
       history.push("/notifications");
@@ -81,7 +87,11 @@ const NotificationButtonLink = () => {
       disableRipple
       className={clsx(match && classes.selected)}
     >
-      <Badge badgeContent={7} color="secondary">
+      <Badge
+        invisible={match || !numUnreadNotifications}
+        badgeContent={numUnreadNotifications}
+        color="secondary"
+      >
         <NotificationsIcon />
       </Badge>
     </IconButton>

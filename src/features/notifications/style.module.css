@@ -11,6 +11,10 @@
   border-top: none;
 }
 
-.notification.new {
+.notification.isNew {
   background-color: rgba(29, 161, 242, 0.1);
+}
+
+.timeAgo {
+  color: #777;
 }
