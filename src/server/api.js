@@ -341,6 +341,55 @@ async function upgradeSpace(io, { spaceNum, shouldPay }) {
   return true;
 }
 
+async function taxSomeOne(io, { spaceNum, playerId }) {
+  // Find space and player
+  const playerToBeTaxed = await model.Player.findOne({ id: playerId }).exec();
+  if (!playerToBeTaxed) return false;
+
+  const space = await model.Space.findOne({ num: spaceNum }).exec();
+  if (!space) return false;
+  if (!["building", "special-building"].includes(space.type)) return false;
+
+  const owner = await model.Player.findOne({ name: space.ownedBy }).exec();
+
+  if (owner.id === playerId) {
+    throw new Error("You want to tax yourself? skr skr");
+  }
+  const updatedPlayerIds = [playerId, owner.id];
+
+  // Calculate tax value
+  let tax = 0;
+  if (space.type === "building") {
+    tax = space.taxes[space.level - 1];
+    if (space.shouldDouble) {
+      tax *= 2;
+    }
+  } else {
+    // special-building
+    tax = space.taxes[0] * space.multiple;
+  }
+  tax = Math.min(tax, playerToBeTaxed.money);
+
+  // Change Money
+  await model.Player.findOneAndUpdate(
+    { id: owner.id },
+    { $inc: { money: tax } }
+  ).exec();
+  await model.Player.findOneAndUpdate(
+    { id: playerId },
+    { $inc: { money: -tax } }
+  ).exec();
+
+  // Update scores
+  await recalculateScore(owner.id);
+  await recalculateScore(playerId);
+
+  // Broadcast players update
+  await broadcastPlayersChange(io, [...updatedPlayerIds]);
+
+  return true;
+}
+
 // ========================================
 // Now we have two permissions: "admin" and "npc"
 // All npcs have same permission
@@ -664,6 +713,40 @@ router.put(
     const { io } = req.app.locals;
     try {
       const isSuccess = await upgradeSpace(io, { spaceNum, shouldPay });
+      if (!isSuccess) {
+        res.status(400).end();
+        return;
+      }
+    } catch (e) {
+      const { message } = e;
+      res.status(400).send({ message });
+      return;
+    }
+
+    res.status(204).end();
+  })
+);
+
+// Change the owner of space
+router.put(
+  "/tax",
+  express.json({ strict: false }),
+  asyncHandler(async (req, res, next) => {
+    const { name } = req.session;
+    if (!verifyPermission(name, ["admin", "npc"])) {
+      res.status(403).end();
+      return;
+    }
+
+    const { spaceNum, playerId } = req.body;
+    if (typeof spaceNum !== "number" || typeof playerId !== "number") {
+      res.status(400).end();
+      return;
+    }
+
+    const { io } = req.app.locals;
+    try {
+      const isSuccess = await taxSomeOne(io, { spaceNum, playerId });
       if (!isSuccess) {
         res.status(400).end();
         return;

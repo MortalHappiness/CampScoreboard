@@ -16,6 +16,7 @@ import ChangeOwner from "../control/ChangeOwner";
 import GiveGoMoney from "../control/GiveGoMoney";
 import BuySpace from "../control/BuySpace";
 import UpgradeSpace from "../control/UpgradeSpace";
+import TaxSomeone from "../control/TaxSomeone";
 
 // ========================================
 
@@ -109,6 +110,8 @@ export default function SpaceControl() {
           <Divider />
           <UpgradeSpace spaceNum={num} disabled={!Boolean(ownedBy)} />
           <Divider />
+          <TaxSomeone spaceNum={num} disabled={!Boolean(ownedBy)} />
+          <Divider />
           <ChangeOwner spaceNum={num} disabled={!Boolean(ownedBy)} />
         </>
       );
@@ -129,6 +132,8 @@ export default function SpaceControl() {
           <Information data={information} />
           <Divider />
           <BuySpace spaceNum={num} disabled={Boolean(ownedBy)} />
+          <Divider />
+          <TaxSomeone spaceNum={num} disabled={!Boolean(ownedBy)} />
           <Divider />
           <ChangeOwner spaceNum={num} disabled={!Boolean(ownedBy)} />
         </>
