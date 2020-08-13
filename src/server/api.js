@@ -88,7 +88,7 @@ async function recalculateShouldDouble(spaceNum) {
   const sameSuiteBuildings = await model.Space.find({ suite }).exec();
   const firstOwnedBy = sameSuiteBuildings[0].ownedBy;
   const newShouldDouble =
-    firstOwnedBy &&
+    firstOwnedBy !== "" &&
     sameSuiteBuildings.every((building) => building.ownedBy === firstOwnedBy);
 
   if (shouldDouble === newShouldDouble) return [];
@@ -700,7 +700,9 @@ async function triggerNextEvent(io, { playerId }) {
       });
       break;
     case "靈堂失火":
-      // TODO
+      const cemeterySpace = await model.Space.findOne({ name: "墳場" }).exec();
+      await destroySpace(io, { spaceNum: cemeterySpace.num - 1 });
+      await destroySpace(io, { spaceNum: cemeterySpace.num + 1 });
       await addNotification(io, {
         title: `事件：${name}`,
         content: `${player.name}觸發事件：${description}`,
