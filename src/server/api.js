@@ -25,7 +25,7 @@ async function addNotification(io, { title, content }) {
   return;
 }
 
-async function getOwnedBuildingValues(playerId) {
+async function getOwnedBuildingsValue(playerId) {
   const player = await model.Player.findOne({ id: playerId }).exec();
 
   let buildingsValue = 0;
@@ -64,7 +64,7 @@ async function recalculateScore(playerId) {
   const buildingRatio =
     player.occupation === "雕刻家" ? 1 : BUILDING_SCORE_RATIO;
 
-  const buildingsValue = await getOwnedBuildingValues(playerId);
+  const buildingsValue = await getOwnedBuildingsValue(playerId);
 
   score += buildingsValue * buildingRatio;
 
@@ -422,6 +422,7 @@ async function useCard(io, { playerId, card }) {
   if (!cardUser) return false;
 
   let result;
+  let players;
   switch (card) {
     case "均富卡":
       result = await model.Player.aggregate([
@@ -435,7 +436,7 @@ async function useCard(io, { playerId, card }) {
       ]).exec();
       const { playerCount, totalMoney } = result[0];
       const newMoney = Math.floor(totalMoney / playerCount);
-      const players = await model.Player.find({}).exec();
+      players = await model.Player.find({}).exec();
       await Promise.all(
         players.map(async (player) => {
           const moneyChange = newMoney - player.money;
@@ -481,6 +482,17 @@ async function useCard(io, { playerId, card }) {
       break;
 
     case "房稅卡":
+      players = await model.Player.find({}).exec();
+      await Promise.all(
+        players.map(async (player) => {
+          if (player.id === cardUser.id) return;
+          const buildingsValue = await getOwnedBuildingsValue(player.id);
+          await updateMoney(io, {
+            playerId: player.id,
+            moneyChange: -Math.floor(buildingsValue * 0.2),
+          });
+        })
+      );
       await addNotification(io, {
         title: "卡片：房稅卡",
         content: `${cardUser.name}使用了房稅卡，其他所有隊伍損失持有房產總價值20%的現金`,
