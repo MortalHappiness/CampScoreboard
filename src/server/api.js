@@ -83,12 +83,13 @@ async function recalculateShouldDouble(spaceNum) {
   const space = await model.Space.findOne({ num: spaceNum }).exec();
   if (!space) return [];
   if (space.type !== "building") return [];
-  const { suite, ownedBy, shouldDouble } = space;
+  const { suite, shouldDouble } = space;
 
   const sameSuiteBuildings = await model.Space.find({ suite }).exec();
-  const newShouldDouble = sameSuiteBuildings.every(
-    (building) => building.ownedBy === ownedBy
-  );
+  const firstOwnedBy = sameSuiteBuildings[0].ownedBy;
+  const newShouldDouble =
+    firstOwnedBy &&
+    sameSuiteBuildings.every((building) => building.ownedBy === firstOwnedBy);
 
   if (shouldDouble === newShouldDouble) return [];
 
@@ -117,19 +118,22 @@ async function recalculateMultiple() {
   await Promise.all(
     ownCounts.map(async (ownCount) => {
       const { _id: ownedBy, count: multiple } = ownCount;
-      if (ownedBy === "") return;
-      await model.Space.updateMany(
-        { type: "special-building", ownedBy },
-        { multiple }
-      ).exec();
+      if (ownedBy === "") {
+        await model.Space.updateMany(
+          { type: "special-building", ownedBy },
+          { multiple: 0 }
+        ).exec();
+      } else {
+        await model.Space.updateMany(
+          { type: "special-building", ownedBy },
+          { multiple }
+        ).exec();
+      }
     })
   );
 
   // return changed spaces' nums
-  const spaces = await model.Space.find({
-    type: "special-building",
-    ownedBy: { $ne: "" },
-  }).exec();
+  const spaces = await model.Space.find({ type: "special-building" }).exec();
   return spaces.map((space) => space.num);
 }
 
@@ -364,6 +368,62 @@ async function upgradeSpace(io, { spaceNum, shouldPay }) {
 
   // Broadcast players update
   await broadcastPlayersChange(io, [...updatedPlayerIds]);
+
+  return true;
+}
+
+async function destroySpace(io, { spaceNum }) {
+  const updatedPlayerIds = new Set();
+  const updatedSpaceNums = new Set([spaceNum]);
+
+  // Find space
+  const space = await model.Space.findOne({ num: spaceNum }).exec();
+  if (!space) return false;
+  if (!["building", "special-building"].includes(space.type)) return false;
+  if (space.ownedBy === "") return false;
+
+  const origOwner = await model.Player.findOne({ name: space.ownedBy }).exec();
+  if (!origOwner) return false;
+  updatedPlayerIds.add(origOwner.id);
+
+  // Update owner
+  if (space.type === "building") {
+    await model.Space.findOneAndUpdate(
+      { num: spaceNum },
+      { ownedBy: "", level: 0 }
+    ).exec();
+  } else {
+    // special-building
+    await model.Space.findOneAndUpdate(
+      { num: spaceNum },
+      { ownedBy: "" }
+    ).exec();
+  }
+
+  // Update scores
+  await recalculateScore(origOwner.id);
+
+  // handle space attributes change
+  let changedSpaceNums;
+
+  if (space.type === "building") {
+    changedSpaceNums = await recalculateShouldDouble(spaceNum);
+    changedSpaceNums.forEach((spaceNum) => {
+      updatedSpaceNums.add(spaceNum);
+    });
+  } else {
+    // special-building
+    changedSpaceNums = await recalculateMultiple(spaceNum);
+    changedSpaceNums.forEach((spaceNum) => {
+      updatedSpaceNums.add(spaceNum);
+    });
+  }
+
+  // Broadcast players update
+  await broadcastPlayersChange(io, [...updatedPlayerIds]);
+
+  // Broadcast spaces update
+  await broadcastSpacesChange(io, [...updatedSpaceNums]);
 
   return true;
 }
@@ -972,7 +1032,7 @@ router.put(
   })
 );
 
-// Change the owner of space
+// Buy the space
 router.put(
   "/buy",
   express.json({ strict: false }),
@@ -1093,6 +1153,34 @@ router.put(
 
     const { io } = req.app.locals;
     const isSuccess = await triggerNextEvent(io, { playerId });
+    if (!isSuccess) {
+      res.status(400).end();
+      return;
+    }
+
+    res.status(204).end();
+  })
+);
+
+// Destroy a space
+router.put(
+  "/destroy",
+  express.json({ strict: false }),
+  asyncHandler(async (req, res, next) => {
+    const { name } = req.session;
+    if (!verifyPermission(name, ["admin", "npc"])) {
+      res.status(403).end();
+      return;
+    }
+
+    const { spaceNum } = req.body;
+    if (typeof spaceNum !== "number") {
+      res.status(400).end();
+      return;
+    }
+
+    const { io } = req.app.locals;
+    const isSuccess = await destroySpace(io, { spaceNum });
     if (!isSuccess) {
       res.status(400).end();
       return;

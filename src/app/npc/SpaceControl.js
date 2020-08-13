@@ -21,6 +21,7 @@ import BuySpace from "../control/BuySpace";
 import UpgradeSpace from "../control/UpgradeSpace";
 import TaxSomeone from "../control/TaxSomeone";
 import TriggerEvent from "../control/TriggerEvent";
+import DestroySpace from "../control/DestroySpace";
 
 // ========================================
 
@@ -119,6 +120,8 @@ export default function SpaceControl() {
           <TaxSomeone spaceNum={num} disabled={!Boolean(ownedBy)} />
           <Divider />
           <ChangeOwner spaceNum={num} disabled={!Boolean(ownedBy)} />
+          <Divider />
+          <DestroySpace spaceNum={num} disabled={!Boolean(ownedBy)} />
         </>
       );
       break;
@@ -142,6 +145,8 @@ export default function SpaceControl() {
           <TaxSomeone spaceNum={num} disabled={!Boolean(ownedBy)} />
           <Divider />
           <ChangeOwner spaceNum={num} disabled={!Boolean(ownedBy)} />
+          <Divider />
+          <DestroySpace spaceNum={num} disabled={!Boolean(ownedBy)} />
         </>
       );
       break;
