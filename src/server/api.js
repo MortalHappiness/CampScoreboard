@@ -533,11 +533,25 @@ async function triggerNextEvent(io, { playerId }) {
   const eventDocument = await model.Event.findOne({ id: eventId }).exec();
   const { name, description } = eventDocument;
 
+  let addtionalInfo;
   switch (name) {
     case "你們很夠格":
+      const goSpace = await model.Space.findOne({ type: "Go" }).exec();
+      if (goSpace.level >= goSpace.costs.length - 1) {
+        console.error("Go space cannot be upgrade further!");
+        return;
+      }
+      await model.Space.findOneAndUpdate(
+        { type: "Go" },
+        { $inc: { level: 1 } }
+      ).exec();
+      await broadcastSpacesChange(io, [goSpace.num]);
+      addtionalInfo = `$${goSpace.costs[goSpace.level]} -> $${
+        goSpace.costs[goSpace.level + 1]
+      }`;
       await addNotification(io, {
         title: `事件：${name}`,
-        content: `${player.name}觸發事件：${description}`,
+        content: `${player.name}觸發事件：${description}(${addtionalInfo})`,
       });
       break;
     case "小夫我要進來了":
@@ -553,6 +567,7 @@ async function triggerNextEvent(io, { playerId }) {
       });
       break;
     case "武漢肺炎":
+      // TODO
       await addNotification(io, {
         title: `事件：${name}`,
         content: `${player.name}觸發事件：${description}`,
@@ -565,6 +580,7 @@ async function triggerNextEvent(io, { playerId }) {
       });
       break;
     case "革命":
+      // TODO
       await addNotification(io, {
         title: `事件：${name}`,
         content: `${player.name}觸發事件：${description}`,
@@ -577,12 +593,14 @@ async function triggerNextEvent(io, { playerId }) {
       });
       break;
     case "流星雨":
+      // TODO
       await addNotification(io, {
         title: `事件：${name}`,
         content: `${player.name}觸發事件：${description}`,
       });
       break;
     case "靈堂失火":
+      // TODO
       await addNotification(io, {
         title: `事件：${name}`,
         content: `${player.name}觸發事件：${description}`,

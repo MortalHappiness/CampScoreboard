@@ -49,6 +49,7 @@ const BarTitle = () => {
         <Route path="/admin/money-control">Money Control</Route>
         <Route path="/admin/use-cards">Use Cards</Route>
         <Route path="/admin/set-occupation">Set Occupation</Route>
+        <Route path="/admin/spaces-control">Spaces Control</Route>
         <Route path="/spaces">Spaces</Route>
         <Route path="/notifications">Notifications</Route>
         <Route path="/login">Login</Route>

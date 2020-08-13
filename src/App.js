@@ -22,6 +22,7 @@ import LoginForm from "./app/Login";
 import MoneyControl from "./app/control/MoneyControl";
 import UseCards from "./app/admin/UseCards";
 import SetOccupation from "./app/admin/SetOccupation";
+import SpacesControl from "./app/admin/SpacesControl";
 
 import SpaceControl from "./app/npc/SpaceControl";
 
@@ -39,7 +40,7 @@ const ProtectedRoute = ({ permission, children, ...rest }) => {
       }
       break;
     case "npc":
-      if (!userName.startsWith("npc")) {
+      if (userName !== "admin" && !userName.startsWith("npc")) {
         return <NoPermission />;
       }
       break;
@@ -86,6 +87,13 @@ export default function App() {
                 permission="admin"
               >
                 <SetOccupation />
+              </ProtectedRoute>
+              <ProtectedRoute
+                exact
+                path="/admin/spaces-control"
+                permission="admin"
+              >
+                <SpacesControl />
               </ProtectedRoute>
               <ProtectedRoute exact path="/admin/use-cards" permission="admin">
                 <UseCards />

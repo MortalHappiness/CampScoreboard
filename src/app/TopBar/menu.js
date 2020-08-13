@@ -17,6 +17,7 @@ import MonetizationOnOutlinedIcon from "@material-ui/icons/MonetizationOnOutline
 import WorkIcon from "@material-ui/icons/Work";
 import RecentActorsIcon from "@material-ui/icons/RecentActors";
 import AddBoxIcon from "@material-ui/icons/AddBox";
+import GamesIcon from "@material-ui/icons/Games";
 
 import {
   selectSessionName,
@@ -100,6 +101,11 @@ export default function MenuButtonDrawer() {
               to="/admin/set-occupation"
               icon={<WorkIcon />}
               text={"Set Occupation"}
+            />
+            <ListItemLink
+              to="/admin/spaces-control"
+              icon={<GamesIcon />}
+              text={"Spaces Control"}
             />
           </>
         )}

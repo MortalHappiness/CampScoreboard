@@ -7,7 +7,10 @@ import Typography from "@material-ui/core/Typography";
 import Divider from "@material-ui/core/Divider";
 
 import { selectSpaceByNum } from "../../features/spaces/spaceSlice";
-import { selectSessionSpaces } from "../../features/session/sessionSlice";
+import {
+  selectSessionName,
+  selectSessionSpaces,
+} from "../../features/session/sessionSlice";
 import NoPermission from "../NoPermission";
 
 import MoneyControl from "../control/MoneyControl";
@@ -56,6 +59,8 @@ const Information = ({ data }) => {
 export default function SpaceControl() {
   const classes = useStyles();
 
+  const userName = useSelector(selectSessionName);
+
   const spaceId = Number(useParams().spaceId);
   const spaces = useSelector(selectSessionSpaces);
 
@@ -64,7 +69,7 @@ export default function SpaceControl() {
   if (!space) {
     return <WrappedTypography text="No Such Space" />;
   }
-  if (!spaces.includes(spaceId)) {
+  if (userName !== "admin" && !spaces.includes(spaceId)) {
     return <NoPermission />;
   }
 
