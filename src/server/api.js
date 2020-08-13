@@ -534,7 +534,6 @@ async function triggerNextEvent(io, { playerId }) {
   const { name, description } = eventDocument;
 
   let addtionalInfo;
-  let players;
   switch (name) {
     case "你們很夠格":
       const goSpace = await model.Space.findOne({ type: "Go" }).exec();
@@ -606,7 +605,22 @@ async function triggerNextEvent(io, { playerId }) {
       });
       break;
     case "革命":
-      // TODO
+      const players = await model.Player.find({}).exec();
+      await Promise.all(
+        players.map(async (player) => {
+          if (player.occupation === "農民") {
+            await updateMoney(io, {
+              playerId: player.id,
+              moneyChange: 2 * player.money,
+            });
+          } else {
+            await updateMoney(io, {
+              playerId: player.id,
+              moneyChange: -Math.floor(player.money / 2),
+            });
+          }
+        })
+      );
       await addNotification(io, {
         title: `事件：${name}`,
         content: `${player.name}觸發事件：${description}`,
