@@ -408,12 +408,13 @@ async function taxSomeOne(io, { spaceNum, playerId }) {
 }
 
 async function useCard(io, { playerId, card }) {
-  const player = await model.Player.findOne({ id: playerId }).exec();
-  if (!player) return false;
+  const cardUser = await model.Player.findOne({ id: playerId }).exec();
+  if (!cardUser) return false;
 
+  let result;
   switch (card) {
     case "均富卡":
-      const result = await model.Player.aggregate([
+      result = await model.Player.aggregate([
         {
           $group: {
             _id: null,
@@ -433,21 +434,46 @@ async function useCard(io, { playerId, card }) {
       );
       await addNotification(io, {
         title: "卡片：均富卡",
-        content: `${player.name}使用了均富卡，所有隊伍的現金平分!`,
+        content: `${cardUser.name}使用了均富卡，所有隊伍的現金平分!`,
       });
       break;
 
     case "法槌卡":
+      result = await model.Player.aggregate([
+        {
+          $group: {
+            _id: null,
+            maxMoney: { $max: "$money" },
+          },
+        },
+      ]).exec();
+      const { maxMoney } = result[0];
+      const maxMoneyPlayers = await model.Player.find({
+        money: maxMoney,
+      }).exec();
+      // Random select a player if multiple maxMoneyPlayers
+      const idx = Math.floor(Math.random() * maxMoneyPlayers.length);
+      const maxMoneyPlayer = maxMoneyPlayers[idx];
+      const moneyToBeSubtracted = Math.floor(maxMoneyPlayer.money / 4);
+      const moneyGained = Math.floor(moneyToBeSubtracted / 2);
+      await updateMoney(io, {
+        playerId: maxMoneyPlayer.id,
+        moneyChange: -moneyToBeSubtracted,
+      });
+      await updateMoney(io, {
+        playerId: cardUser.id,
+        moneyChange: moneyGained,
+      });
       await addNotification(io, {
         title: "卡片：法槌卡",
-        content: `${player.name}使用了法槌卡，當前最有錢小隊(第2小隊)損失1/4的現金($200)，第1小隊獲得其中一半的錢($100)`,
+        content: `${cardUser.name}使用了法槌卡，當前最有錢小隊(${maxMoneyPlayer.name})損失1/4的現金($${moneyToBeSubtracted})，${cardUser.name}獲得其中一半的錢($${moneyGained})`,
       });
       break;
 
     case "房稅卡":
       await addNotification(io, {
         title: "卡片：房稅卡",
-        content: `${player.name}使用了房稅卡，其他所有隊伍損失持有房產總價值20%的現金`,
+        content: `${cardUser.name}使用了房稅卡，其他所有隊伍損失持有房產總價值20%的現金`,
       });
       break;
 
