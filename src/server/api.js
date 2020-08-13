@@ -408,28 +408,48 @@ async function taxSomeOne(io, { spaceNum, playerId }) {
 }
 
 async function useCard(io, { playerId, card }) {
-  console.log("useCard", card);
+  const player = await model.Player.findOne({ id: playerId }).exec();
+  if (!player) return false;
 
   switch (card) {
     case "均富卡":
+      const result = await model.Player.aggregate([
+        {
+          $group: {
+            _id: null,
+            playerCount: { $sum: 1 },
+            totalMoney: { $sum: "$money" },
+          },
+        },
+      ]).exec();
+      const { playerCount, totalMoney } = result[0];
+      const newMoney = Math.floor(totalMoney / playerCount);
+      await model.Player.updateMany({}, { money: newMoney }).exec();
+      const playerUpdates = await model.Player.find(
+        {},
+        { _id: false, __v: false }
+      ).exec();
+      io.emit("UPDATE_PLAYERS", playerUpdates);
       await addNotification(io, {
         title: "卡片：均富卡",
-        content: "第1小隊使用了均富卡，所有隊伍的現金平分!",
+        content: `${player.name}使用了均富卡，所有隊伍的現金平分!`,
       });
       break;
+
     case "法槌卡":
       await addNotification(io, {
         title: "卡片：法槌卡",
-        content:
-          "第1小隊使用了法槌卡，當前最有錢小隊(第2小隊)損失1/4的現金($200)，第1小隊獲得其中一半的錢($100)",
+        content: `${player.name}使用了法槌卡，當前最有錢小隊(第2小隊)損失1/4的現金($200)，第1小隊獲得其中一半的錢($100)`,
       });
       break;
+
     case "房稅卡":
       await addNotification(io, {
         title: "卡片：房稅卡",
-        content: "第1小隊使用了房稅卡，其他所有隊伍損失持有房產總價值20%的現金",
+        content: `${player.name}使用了房稅卡，其他所有隊伍損失持有房產總價值20%的現金`,
       });
       break;
+
     default:
       return false;
   }
