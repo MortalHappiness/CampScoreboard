@@ -17,6 +17,7 @@ import GiveGoMoney from "../control/GiveGoMoney";
 import BuySpace from "../control/BuySpace";
 import UpgradeSpace from "../control/UpgradeSpace";
 import TaxSomeone from "../control/TaxSomeone";
+import TriggerEvent from "../control/TriggerEvent";
 
 // ========================================
 
@@ -217,6 +218,8 @@ export default function SpaceControl() {
         <>
           <div className={classes.section}>
             <b>種類: </b>事件格
+            <Divider />
+            <TriggerEvent />
           </div>
         </>
       );

@@ -9,6 +9,7 @@ const players = require("../data/players.json");
 const spaces = require("../data/spaces.json");
 const accounts = require("../data/accounts.json");
 const notifications = require("../data/notifications.json");
+const { events, eventOrder } = require("../data/events.json");
 
 const CONSTANTS = require("../data/constants.json");
 
@@ -39,6 +40,12 @@ module.exports = () => {
     // Drop the db
     await db.dropDatabase();
     console.log("Database has been cleared.");
+
+    // Save key-value pairs
+    console.log("Saving key-value pairs...");
+    new model.Pair({ key: "current-event-index", value: 0 }).save();
+    new model.Pair({ key: "event-order", value: eventOrder }).save();
+    console.log("All key-value pairs are saved.");
 
     // Save all players
     await Promise.all(
@@ -115,6 +122,15 @@ module.exports = () => {
       })
     );
     console.log("All accounts are saved.");
+
+    // Save all events
+    await Promise.all(
+      events.map(async (data) => {
+        const eventDocument = new model.Event(data);
+        await eventDocument.save();
+      })
+    );
+    console.log("All events are saved.");
 
     // Disconnect
     await mongoose.disconnect();

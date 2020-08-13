@@ -1,21 +1,166 @@
 [
   {
     "name": "admin",
-    "password": "admin-pass"
+    "password": "s6Zeqc"
   },
   {
     "name": "npc1",
-    "password": "npc1-pass",
-    "spaces": [0, 1, 2, 3, 4, 5, 6, 7, 10, 12, 15, 17, 20, 22, 25, 30, 35, 39]
+    "password": "b8A6",
+    "spaces": [0, 1]
   },
   {
     "name": "npc2",
-    "password": "npc2-pass",
+    "password": "Ttl9",
     "spaces": [2, 3]
   },
   {
     "name": "npc3",
-    "password": "npc3-pass",
+    "password": "lT1Z",
     "spaces": [4]
+  },
+  {
+    "name": "npc4",
+    "password": "j6X9",
+    "spaces": [5]
+  },
+  {
+    "name": "npc5",
+    "password": "O5Is",
+    "spaces": [6, 7]
+  },
+  {
+    "name": "npc6",
+    "password": "Erec",
+    "spaces": [8]
+  },
+  {
+    "name": "npc7",
+    "password": "q5YM",
+    "spaces": [9]
+  },
+  {
+    "name": "npc8",
+    "password": "GeQW",
+    "spaces": [10]
+  },
+  {
+    "name": "npc9",
+    "password": "fAQB",
+    "spaces": [11]
+  },
+  {
+    "name": "npc10",
+    "password": "g1XS",
+    "spaces": [12]
+  },
+  {
+    "name": "npc11",
+    "password": "AHke",
+    "spaces": [13]
+  },
+  {
+    "name": "npc12",
+    "password": "qh1m",
+    "spaces": [14]
+  },
+  {
+    "name": "npc13",
+    "password": "rfWb",
+    "spaces": [15]
+  },
+  {
+    "name": "npc14",
+    "password": "U7HF",
+    "spaces": [16, 17]
+  },
+  {
+    "name": "npc15",
+    "password": "1NDS",
+    "spaces": [18]
+  },
+  {
+    "name": "npc16",
+    "password": "ukaz",
+    "spaces": [19]
+  },
+  {
+    "name": "npc17",
+    "password": "UPSQ",
+    "spaces": [20, 21]
+  },
+  {
+    "name": "npc18",
+    "password": "KTo8",
+    "spaces": [22, 23]
+  },
+  {
+    "name": "npc19",
+    "password": "GZ7Q",
+    "spaces": [24]
+  },
+  {
+    "name": "npc20",
+    "password": "3EF2",
+    "spaces": [25]
+  },
+  {
+    "name": "npc21",
+    "password": "jPWu",
+    "spaces": [26]
+  },
+  {
+    "name": "npc22",
+    "password": "pIgR",
+    "spaces": [27]
+  },
+  {
+    "name": "npc23",
+    "password": "1uDM",
+    "spaces": [28]
+  },
+  {
+    "name": "npc24",
+    "password": "Y0G3",
+    "spaces": [29]
+  },
+  {
+    "name": "npc25",
+    "password": "Vfbr",
+    "spaces": [30]
+  },
+  {
+    "name": "npc26",
+    "password": "VxC2",
+    "spaces": [31]
+  },
+  {
+    "name": "npc27",
+    "password": "dctN",
+    "spaces": [32, 33]
+  },
+  {
+    "name": "npc28",
+    "password": "iqW0",
+    "spaces": [34]
+  },
+  {
+    "name": "npc29",
+    "password": "fwtj",
+    "spaces": [35, 36]
+  },
+  {
+    "name": "npc30",
+    "password": "TJcm",
+    "spaces": [37]
+  },
+  {
+    "name": "npc31",
+    "password": "zMjn",
+    "spaces": [38]
+  },
+  {
+    "name": "npc32",
+    "password": "HHBd",
+    "spaces": [39]
   }
 ]

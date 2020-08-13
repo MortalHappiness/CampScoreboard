@@ -2,10 +2,26 @@ const mongoose = require("mongoose");
 
 // ========================================
 
+const pairSchema = new mongoose.Schema({
+  key: {
+    type: String,
+    required: true,
+    immutable: true,
+  },
+  value: {
+    type: mongoose.Mixed,
+    required: true,
+  },
+});
+
+const Pair = mongoose.model("Pair", pairSchema);
+
+// ========================================
+
 const playerSchema = new mongoose.Schema({
   id: {
     type: Number,
-    require: true,
+    required: true,
     immutable: true,
   },
   name: {
@@ -119,9 +135,33 @@ const Notification = mongoose.model("Notification", notificationSchema);
 
 // ========================================
 
+const eventSchema = new mongoose.Schema({
+  id: {
+    type: Number,
+    required: true,
+    immutable: true,
+  },
+  name: {
+    type: String,
+    required: true,
+    immutable: true,
+  },
+  description: {
+    type: String,
+    required: true,
+    immutable: true,
+  },
+});
+
+const Event = mongoose.model("Event", eventSchema);
+
+// ========================================
+
 module.exports = {
+  Pair,
   Player,
   Space,
   Account,
   Notification,
+  Event,
 };

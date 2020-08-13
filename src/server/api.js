@@ -20,9 +20,6 @@ async function addNotification(io, { title, content }) {
   const notificationDocument = new model.Notification(notification);
   await notificationDocument.save();
 
-  console.log(notificationDocument);
-  console.log(await model.Notification.find({}).exec());
-
   io.emit("UPDATE_NOTIFICATIONS", [notificationDocument]);
 
   return;
@@ -411,7 +408,7 @@ async function useCard(io, { playerId, card }) {
     case "均富卡":
       await addNotification(io, {
         title: "卡片：均富卡",
-        content: "第1小隊使用了均富卡，所有隊伍的現金平分",
+        content: "第1小隊使用了均富卡，所有隊伍的現金平分!",
       });
       break;
     case "法槌卡":
@@ -425,6 +422,95 @@ async function useCard(io, { playerId, card }) {
       await addNotification(io, {
         title: "卡片：房稅卡",
         content: "第1小隊使用了房稅卡，其他所有隊伍損失持有房產總價值20%的現金",
+      });
+      break;
+    default:
+      return false;
+  }
+
+  return true;
+}
+
+async function triggerNextEvent(io, { playerId }) {
+  // Get player name
+  const player = await model.Player.findOne({ id: playerId }).exec();
+  if (!player) return false;
+
+  // Get current index and eventOrder
+  const { value: currentEventIndex } = await model.Pair.findOne({
+    key: "current-event-index",
+  }).exec();
+  const { value: eventOrder } = await model.Pair.findOne({
+    key: "event-order",
+  }).exec();
+
+  // Increase current event index
+  await model.Pair.findOneAndUpdate(
+    { key: "current-event-index" },
+    { $inc: { value: 1 } }
+  ).exec();
+
+  // Event 用完都放流星雨
+  // 流星雨的id是8
+  const eventId =
+    currentEventIndex < eventOrder.length ? eventOrder[currentEventIndex] : 8;
+
+  const eventDocument = await model.Event.findOne({ id: eventId }).exec();
+  const { name, description } = eventDocument;
+
+  switch (name) {
+    case "你們很夠格":
+      await addNotification(io, {
+        title: `事件：${name}`,
+        content: `${player.name}觸發事件：${description}`,
+      });
+      break;
+    case "小夫我要進來了":
+      await addNotification(io, {
+        title: `事件：${name}`,
+        content: `${player.name}觸發事件：${description}`,
+      });
+      break;
+    case "公主號靠岸":
+      await addNotification(io, {
+        title: `事件：${name}`,
+        content: `${player.name}觸發事件：${description}`,
+      });
+      break;
+    case "武漢肺炎":
+      await addNotification(io, {
+        title: `事件：${name}`,
+        content: `${player.name}觸發事件：${description}`,
+      });
+      break;
+    case "裂地衝擊":
+      await addNotification(io, {
+        title: `事件：${name}`,
+        content: `${player.name}觸發事件：${description}`,
+      });
+      break;
+    case "革命":
+      await addNotification(io, {
+        title: `事件：${name}`,
+        content: `${player.name}觸發事件：${description}`,
+      });
+      break;
+    case "梅圃":
+      await addNotification(io, {
+        title: `事件：${name}`,
+        content: `${player.name}觸發事件：${description}`,
+      });
+      break;
+    case "流星雨":
+      await addNotification(io, {
+        title: `事件：${name}`,
+        content: `${player.name}觸發事件：${description}`,
+      });
+      break;
+    case "靈堂失火":
+      await addNotification(io, {
+        title: `事件：${name}`,
+        content: `${player.name}觸發事件：${description}`,
       });
       break;
     default:
@@ -848,6 +934,34 @@ router.put(
     } catch (e) {
       const { message } = e;
       res.status(400).send({ message });
+      return;
+    }
+
+    res.status(204).end();
+  })
+);
+
+// One player trigger event
+router.put(
+  "/event",
+  express.json({ strict: false }),
+  asyncHandler(async (req, res, next) => {
+    const { name } = req.session;
+    if (!verifyPermission(name, ["admin", "npc"])) {
+      res.status(403).end();
+      return;
+    }
+
+    const { playerId } = req.body;
+    if (typeof playerId !== "number") {
+      res.status(400).end();
+      return;
+    }
+
+    const { io } = req.app.locals;
+    const isSuccess = await triggerNextEvent(io, { playerId });
+    if (!isSuccess) {
+      res.status(400).end();
       return;
     }
 
