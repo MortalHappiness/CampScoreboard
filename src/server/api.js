@@ -534,6 +534,7 @@ async function triggerNextEvent(io, { playerId }) {
   const { name, description } = eventDocument;
 
   let addtionalInfo;
+  let players;
   switch (name) {
     case "你們很夠格":
       const goSpace = await model.Space.findOne({ type: "Go" }).exec();
@@ -567,10 +568,35 @@ async function triggerNextEvent(io, { playerId }) {
       });
       break;
     case "武漢肺炎":
-      // TODO
+      const hospitalSpace = await model.Space.findOne({ name: "醫院" }).exec();
+      if (hospitalSpace.ownedBy === "") {
+        addtionalInfo = `目前無人擁有醫院`;
+      } else {
+        const hospitalOwner = await model.Player.findOne({
+          name: hospitalSpace.ownedBy,
+        }).exec();
+        const otherPlayers = await model.Player.find({
+          id: { $ne: hospitalOwner.id },
+        }).exec();
+        let moneyGain = 0;
+        await Promise.all(
+          otherPlayers.map(async (player) => {
+            moneyGain += Math.min(player.money, 3000);
+            await updateMoney(io, {
+              playerId: player.id,
+              moneyChange: -3000,
+            });
+          })
+        );
+        await updateMoney(io, {
+          playerId: hospitalOwner.id,
+          moneyChange: moneyGain,
+        });
+        addtionalInfo = `${hospitalOwner.name}獲得了$${moneyGain}`;
+      }
       await addNotification(io, {
         title: `事件：${name}`,
-        content: `${player.name}觸發事件：${description}`,
+        content: `${player.name}觸發事件：${description}(${addtionalInfo})`,
       });
       break;
     case "裂地衝擊":
