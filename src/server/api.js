@@ -25,6 +25,30 @@ async function addNotification(io, { title, content }) {
   return;
 }
 
+async function getOwnedBuildingValues(playerId) {
+  const player = await model.Player.findOne({ id: playerId }).exec();
+
+  let buildingsValue = 0;
+  const buildings = await model.Space.find({
+    ownedBy: player.name,
+    type: "building",
+  }).exec();
+  buildings.forEach((building) => {
+    const { costs, level } = building;
+    const cost = costs.slice(0, level).reduce((a, b) => a + b, 0);
+    buildingsValue += cost;
+  });
+
+  const specialBuildings = await model.Space.find({
+    ownedBy: player.name,
+    type: "special-building",
+  }).exec();
+  specialBuildings.forEach((specialBuilding) => {
+    buildingsValue += specialBuilding.costs[0];
+  });
+  return buildingsValue;
+}
+
 async function recalculateScore(playerId) {
   const player = await model.Player.findOne({ id: playerId }).exec();
   let score = player.money;
@@ -40,23 +64,9 @@ async function recalculateScore(playerId) {
   const buildingRatio =
     player.occupation === "雕刻家" ? 1 : BUILDING_SCORE_RATIO;
 
-  const buildings = await model.Space.find({
-    ownedBy: player.name,
-    type: "building",
-  }).exec();
-  buildings.forEach((building) => {
-    const { costs, level } = building;
-    const cost = costs.slice(0, level).reduce((a, b) => a + b, 0);
-    score += cost * buildingRatio;
-  });
+  const buildingsValue = await getOwnedBuildingValues(playerId);
 
-  const specialBuildings = await model.Space.find({
-    ownedBy: player.name,
-    type: "special-building",
-  }).exec();
-  specialBuildings.forEach((specialBuilding) => {
-    score += specialBuilding.costs[0] * buildingRatio;
-  });
+  score += buildingsValue * buildingRatio;
 
   score = Math.floor(score);
 
