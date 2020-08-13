@@ -424,12 +424,13 @@ async function useCard(io, { playerId, card }) {
       ]).exec();
       const { playerCount, totalMoney } = result[0];
       const newMoney = Math.floor(totalMoney / playerCount);
-      await model.Player.updateMany({}, { money: newMoney }).exec();
-      const playerUpdates = await model.Player.find(
-        {},
-        { _id: false, __v: false }
-      ).exec();
-      io.emit("UPDATE_PLAYERS", playerUpdates);
+      const players = await model.Player.find({}).exec();
+      await Promise.all(
+        players.map(async (player) => {
+          const moneyChange = newMoney - player.money;
+          await updateMoney(io, { playerId: player.id, moneyChange });
+        })
+      );
       await addNotification(io, {
         title: "卡片：均富卡",
         content: `${player.name}使用了均富卡，所有隊伍的現金平分!`,
