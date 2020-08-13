@@ -37,6 +37,9 @@ async function recalculateScore(playerId) {
     score += game.costs[0];
   });
 
+  const buildingRatio =
+    player.occupation === "雕刻家" ? 1 : BUILDING_SCORE_RATIO;
+
   const buildings = await model.Space.find({
     ownedBy: player.name,
     type: "building",
@@ -44,7 +47,7 @@ async function recalculateScore(playerId) {
   buildings.forEach((building) => {
     const { costs, level } = building;
     const cost = costs.slice(0, level).reduce((a, b) => a + b, 0);
-    score += cost * BUILDING_SCORE_RATIO;
+    score += cost * buildingRatio;
   });
 
   const specialBuildings = await model.Space.find({
@@ -52,7 +55,7 @@ async function recalculateScore(playerId) {
     type: "special-building",
   }).exec();
   specialBuildings.forEach((specialBuilding) => {
-    score += specialBuilding.costs[0] * BUILDING_SCORE_RATIO;
+    score += specialBuilding.costs[0] * buildingRatio;
   });
 
   score = Math.floor(score);
@@ -178,6 +181,9 @@ async function updateOccupation(io, { playerId, occupation }) {
     { $set: { occupation } }
   ).exec();
   if (!player) return false;
+
+  // Recalculate score because 雕刻家's building ratio is different
+  await recalculateScore(playerId);
 
   await broadcastPlayersChange(io, [playerId]);
 
