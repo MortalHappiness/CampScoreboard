@@ -3,6 +3,7 @@ const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcrypt");
 
 const model = require("./database/mongo/model");
+const utils = require("./utils");
 
 const CONSTANTS = require("./database/data/constants.json");
 
@@ -693,10 +694,21 @@ async function triggerNextEvent(io, { playerId }) {
       });
       break;
     case "流星雨":
-      // TODO
+      const buildings = await model.Space.find({
+        $or: [{ type: "building" }, { type: "special-building" }],
+      }).exec();
+      const buildingNums = buildings.map((building) => building.num);
+      const toBeDestroy = utils.shuffle(buildingNums).slice(0, 5);
+      await Promise.all(
+        toBeDestroy.map(async (spaceNum) => {
+          await destroySpace(io, { spaceNum });
+        })
+      );
+      toBeDestroy.sort((a, b) => a - b);
+      addtionalInfo = `被摧毀的建築：${toBeDestroy.join(", ")}`;
       await addNotification(io, {
         title: `事件：${name}`,
-        content: `${player.name}觸發事件：${description}`,
+        content: `${player.name}觸發事件：${description}(${addtionalInfo})`,
       });
       break;
     case "靈堂失火":
