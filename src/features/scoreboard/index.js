@@ -39,7 +39,7 @@ const useStyles = makeStyles({
     padding: "8px 0 8px 3px",
   },
   rank1: {
-    backgroundColor: "#ffee00",
+    backgroundColor: "#ffca00",
     color: "white",
     fontWeight: "bold",
   },
