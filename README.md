@@ -6,7 +6,7 @@ Scoreboard for the game "Monopoly" for NTUEE orientation camp 2020.
 
 [The demo video](https://mortalhappiness.github.io/CampScoreboard/)
 
-![Demo gif](/CampScoreboard/demo/demo.gif)
+![Demo gif](/demo/demo.gif)
 
 ## Usage
 
