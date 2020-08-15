@@ -2,8 +2,6 @@
 
 Scoreboard for the game "Monopoly" for NTUEE orientation camp 2020.
 
-[中文版說明](#chinese)
-
 ## Usage
 
 After cloning this repo, make sure you have nodeJS, mongo, and Redis installed.
@@ -46,7 +44,15 @@ npm run build
 npm run serve
 ```
 
-<span id="chinese"></span>
-# 中文版說明
+## Used packages
+### Frontend
+create-react-app, redux, react-router-dom, material-ui, clsx, date-fns
 
-2020年台大電機宿營遊戲"大富翁"的計分板。
+### Backend
+express, mongoose, redis, bcrypt, yargs
+
+### Other
+socket.io, dotenv, nodemon, eslint, prettier, lint-staged
+
+## Contribution
+This is the first frontend + backend project done only by myself, any advice, issues, and pull requests are welcomed! 
