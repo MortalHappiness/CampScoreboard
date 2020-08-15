@@ -4,9 +4,11 @@ Scoreboard for the game "Monopoly" for NTUEE orientation camp 2020.
 
 ## Demo
 
-[The demo video](https://mortalhappiness.github.io/CampScoreboard/)
+### [The demo video](https://mortalhappiness.github.io/CampScoreboard/)
 
-![Demo gif](/demo/demo.gif)
+### Screenshot
+
+[![demo image](/demo/demo.png)](https://mortalhappiness.github.io/CampScoreboard/)
 
 ## Usage
 
