@@ -2,6 +2,12 @@
 
 Scoreboard for the game "Monopoly" for NTUEE orientation camp 2020.
 
+## Demo
+
+[The demo video](https://mortalhappiness.github.io/CampScoreboard/)
+
+![Demo gif](/CampScoreboard/demo/demo.gif)
+
 ## Usage
 
 After cloning this repo, make sure you have nodeJS, mongo, and Redis installed.
@@ -22,6 +28,7 @@ REACT_APP_PROXY_TARGET=https://localhost:8000
 ```
 
 Run the following command:
+
 ```sh
 npm install
 npm run reset-db
@@ -45,14 +52,19 @@ npm run serve
 ```
 
 ## Used packages
+
 ### Frontend
+
 create-react-app, redux, react-router-dom, material-ui, clsx, date-fns
 
 ### Backend
+
 express, mongoose, redis, bcrypt, yargs
 
 ### Other
+
 socket.io, dotenv, nodemon, eslint, prettier, lint-staged
 
 ## Contribution
-This is the first frontend + backend project done only by myself, any advice, issues, and pull requests are welcomed! 
+
+This is the first frontend + backend project done only by myself, any advice, issues, and pull requests are welcomed!
