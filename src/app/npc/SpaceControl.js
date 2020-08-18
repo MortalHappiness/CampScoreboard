@@ -210,6 +210,8 @@ export default function SpaceControl() {
           </div>
           <Divider />
           <MoneyControl />
+          <Divider />
+          <TriggerEvent />
         </>
       );
       break;
@@ -232,7 +234,6 @@ export default function SpaceControl() {
       );
       break;
     case "event":
-      // TODO
       component = (
         <>
           <div className={classes.section}>
