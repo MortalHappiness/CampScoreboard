@@ -275,6 +275,46 @@ async function changeOwner(io, { spaceNum, playerId }) {
   return true;
 }
 
+async function robCard(io, { spaceNum, playerId }) {
+  let success;
+
+  const space = await model.Space.findOne({ num: spaceNum }).exec();
+  if (!space) return false;
+  if (!["building", "special-building"].includes(space.type)) return false;
+  if (!space.ownedBy) return false;
+  const oldOwner = await model.Player.findOne({ name: space.ownedBy }).exec();
+  if (!oldOwner) return false;
+  const newOwner = await model.Player.findOne({ id: playerId }).exec();
+  if (!newOwner) return false;
+
+  if (oldOwner.id === newOwner.id) throw new Error("You cannot rob yourself!");
+
+  // compensate
+  let buildingValue;
+  if (space.type === "building") {
+    const { costs, level } = space;
+    buildingValue = costs.slice(0, level).reduce((a, b) => a + b, 0);
+  } else {
+    // special-building
+    buildingValue = space.costs[0];
+  }
+
+  success = await updateMoney(io, {
+    playerId: oldOwner.id,
+    moneyChange: buildingValue,
+  });
+  if (!success) return false;
+
+  success = await changeOwner(io, { spaceNum, playerId });
+  if (!success) return false;
+
+  success = await addNotification(io, {
+    title: "卡片：搶奪卡",
+    content: `${newOwner.name}對第${spaceNum}格使用了搶奪卡，原擁有者${oldOwner.name}返還該房產價值的金錢($${buildingValue})作為補償`,
+  });
+  return true;
+}
+
 async function buySpace(io, { spaceNum, playerId }) {
   const updatedSpaceNums = new Set([spaceNum]);
 
@@ -1007,6 +1047,40 @@ router.put(
     const isSuccess = await changeOwner(io, { spaceNum, playerId });
     if (!isSuccess) {
       res.status(400).end();
+      return;
+    }
+
+    res.status(204).end();
+  })
+);
+
+// Use rob card
+router.put(
+  "/robcard",
+  express.json({ strict: false }),
+  asyncHandler(async (req, res, next) => {
+    const { name } = req.session;
+    if (!verifyPermission(name, ["admin", "npc"])) {
+      res.status(403).end();
+      return;
+    }
+
+    const { spaceNum, playerId } = req.body;
+    if (typeof spaceNum !== "number" || typeof playerId !== "number") {
+      res.status(400).end();
+      return;
+    }
+
+    const { io } = req.app.locals;
+    try {
+      const isSuccess = await robCard(io, { spaceNum, playerId });
+      if (!isSuccess) {
+        res.status(400).end();
+        return;
+      }
+    } catch (e) {
+      const { message } = e;
+      res.status(400).send({ message });
       return;
     }
 

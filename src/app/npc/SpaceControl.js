@@ -16,6 +16,7 @@ import NoPermission from "../NoPermission";
 import MoneyControl from "../control/MoneyControl";
 import UpdateHighestScore from "../control/UpdateHighestScore";
 import ChangeOwner from "../control/ChangeOwner";
+import RobCard from "../control/RobCard";
 import GiveGoMoney from "../control/GiveGoMoney";
 import BuySpace from "../control/BuySpace";
 import UpgradeSpace from "../control/UpgradeSpace";
@@ -121,6 +122,8 @@ export default function SpaceControl() {
           <Divider />
           <ChangeOwner spaceNum={num} disabled={!Boolean(ownedBy)} />
           <Divider />
+          <RobCard spaceNum={num} disabled={!Boolean(ownedBy)} />
+          <Divider />
           <DestroySpace spaceNum={num} disabled={!Boolean(ownedBy)} />
         </>
       );
@@ -145,6 +148,8 @@ export default function SpaceControl() {
           <TaxSomeone spaceNum={num} disabled={!Boolean(ownedBy)} />
           <Divider />
           <ChangeOwner spaceNum={num} disabled={!Boolean(ownedBy)} />
+          <Divider />
+          <RobCard spaceNum={num} disabled={!Boolean(ownedBy)} />
           <Divider />
           <DestroySpace spaceNum={num} disabled={!Boolean(ownedBy)} />
         </>
