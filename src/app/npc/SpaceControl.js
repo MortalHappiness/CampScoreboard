@@ -120,8 +120,10 @@ export default function SpaceControl() {
           <Divider />
           <TaxSomeone spaceNum={num} disabled={!Boolean(ownedBy)} />
           <Divider />
-          <ChangeOwner spaceNum={num} disabled={!Boolean(ownedBy)} />
+          {/*
+          <ChangeOwner spaceNum={num} disabled={true} />
           <Divider />
+          */}
           <RobCard spaceNum={num} disabled={!Boolean(ownedBy)} />
           <Divider />
           <DestroySpace spaceNum={num} disabled={!Boolean(ownedBy)} />
@@ -147,8 +149,10 @@ export default function SpaceControl() {
           <Divider />
           <TaxSomeone spaceNum={num} disabled={!Boolean(ownedBy)} />
           <Divider />
-          <ChangeOwner spaceNum={num} disabled={!Boolean(ownedBy)} />
+          {/*
+          <ChangeOwner spaceNum={num} disabled={true} />
           <Divider />
+          */}
           <RobCard spaceNum={num} disabled={!Boolean(ownedBy)} />
           <Divider />
           <DestroySpace spaceNum={num} disabled={!Boolean(ownedBy)} />

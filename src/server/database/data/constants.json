@@ -14,6 +14,6 @@
     "占卜師"
   ],
   "CARDS": ["均富卡", "法槌卡", "房稅卡"],
-  "INITIAL_MONEY": 100000,
+  "INITIAL_MONEY": 40000,
   "BUILDING_SCORE_RATIO": 0.6
 }
