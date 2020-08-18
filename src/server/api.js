@@ -586,10 +586,10 @@ async function triggerNextEvent(io, { playerId }) {
     { $inc: { value: 1 } }
   ).exec();
 
-  // Event 用完都放流星雨
-  // 流星雨的id是8
+  // Event 用完都放小夫
+  // 小夫的id是10
   const eventId =
-    currentEventIndex < eventOrder.length ? eventOrder[currentEventIndex] : 8;
+    currentEventIndex < eventOrder.length ? eventOrder[currentEventIndex] : 10;
 
   const eventDocument = await model.Event.findOne({ id: eventId }).exec();
   const { name, description } = eventDocument;
