@@ -809,8 +809,8 @@ router
         res.status(403).end();
         return;
       }
-      const { name, spaces } = req.session;
-      res.send({ name, spaces });
+      const { name, spaces, notificationReadTime } = req.session;
+      res.send({ name, spaces, notificationReadTime });
     })
   )
   .post(
@@ -851,6 +851,23 @@ router
       res.status(204).end();
     })
   );
+
+router.put(
+  "/notification-read-time",
+  express.json({ strict: false }),
+  asyncHandler(async (req, res, next) => {
+    const { notificationReadTime } = req.body;
+
+    if (!notificationReadTime || typeof notificationReadTime !== "string") {
+      res.status(403).end();
+      return;
+    }
+
+    req.session.notificationReadTime = notificationReadTime;
+
+    res.status(204).end();
+  })
+);
 
 router.put(
   "/money",
