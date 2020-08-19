@@ -221,6 +221,8 @@ export default function SpaceControl() {
           <div className={classes.section}>
             <b>種類: </b>探監
           </div>
+          <Divider />
+          <GiveGoMoney />
         </>
       );
       break;
