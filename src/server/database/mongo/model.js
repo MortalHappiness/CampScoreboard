@@ -129,6 +129,11 @@ const notificationSchema = new mongoose.Schema({
     required: true,
     immutable: true,
   },
+  type: {
+    type: String,
+    required: true,
+    immutable: true,
+  },
 });
 
 const Notification = mongoose.model("Notification", notificationSchema);

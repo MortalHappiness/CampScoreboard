@@ -15,9 +15,9 @@ const { OCCUPATIONS, BUILDING_SCORE_RATIO, CARDS } = CONSTANTS;
 
 // ========================================
 
-async function addNotification(io, { title, content }) {
+async function addNotification(io, { title, content, type }) {
   const time = new Date().toISOString();
-  const notification = { title, content, time };
+  const notification = { title, content, time, type };
   const notificationDocument = new model.Notification(notification);
   await notificationDocument.save();
 
@@ -170,12 +170,27 @@ async function updateMoney(io, { playerId, moneyChange }) {
   const player = await model.Player.findOne({ id: playerId }).exec();
   if (!player) return false;
 
-  const moneyInc =
-    player.money + moneyChange >= 0 ? moneyChange : -player.money;
+  let bankrupt, moneyInc;
+  if (player.money + moneyChange > 0) {
+    bankrupt = false;
+    moneyInc = moneyChange;
+  } else {
+    if (player.money === 0) return true;
+    bankrupt = true;
+    moneyInc = -player.money;
+  }
   await model.Player.findOneAndUpdate(
     { id: playerId },
     { $inc: { money: moneyInc, score: moneyInc } }
   ).exec();
+
+  if (bankrupt) {
+    await addNotification(io, {
+      title: "通知：破產",
+      content: `${player.name}破產了！`,
+      type: "info",
+    });
+  }
 
   await broadcastPlayersChange(io, [playerId]);
 
@@ -311,6 +326,7 @@ async function robCard(io, { spaceNum, playerId }) {
   success = await addNotification(io, {
     title: "卡片：搶奪卡",
     content: `${newOwner.name}對第${spaceNum}格使用了搶奪卡，原擁有者${oldOwner.name}返還該房產價值的金錢($${buildingValue})作為補償`,
+    type: "card",
   });
   return true;
 }
@@ -332,10 +348,7 @@ async function buySpace(io, { spaceNum, playerId }) {
   if (player.money < cost) {
     throw new Error("Do not have enough money!");
   }
-  await model.Player.findOneAndUpdate(
-    { id: playerId },
-    { $inc: { money: -cost } }
-  ).exec();
+  await updateMoney(io, { playerId, moneyChange: -cost });
 
   // Handle space attributes change
   let changedSpaceNums;
@@ -395,10 +408,7 @@ async function upgradeSpace(io, { spaceNum, shouldPay }) {
   ).exec();
 
   if (shouldPay) {
-    await model.Player.findOneAndUpdate(
-      { id: owner.id },
-      { $inc: { money: -cost } }
-    ).exec();
+    await updateMoney(io, { playerId: owner.id, moneyChange: -cost });
   }
 
   // Update scores
@@ -499,14 +509,8 @@ async function taxSomeOne(io, { spaceNum, playerId }) {
   tax = Math.min(tax, playerToBeTaxed.money);
 
   // Change Money
-  await model.Player.findOneAndUpdate(
-    { id: owner.id },
-    { $inc: { money: tax } }
-  ).exec();
-  await model.Player.findOneAndUpdate(
-    { id: playerId },
-    { $inc: { money: -tax } }
-  ).exec();
+  await updateMoney(io, { playerId: owner.id, moneyChange: tax });
+  await updateMoney(io, { playerId, moneyChange: -tax });
 
   // Update scores
   await recalculateScore(owner.id);
@@ -547,6 +551,7 @@ async function useCard(io, { playerId, card }) {
       await addNotification(io, {
         title: "卡片：均富卡",
         content: `${cardUser.name}使用了均富卡，所有隊伍的現金平分!`,
+        type: "card",
       });
       break;
 
@@ -579,6 +584,7 @@ async function useCard(io, { playerId, card }) {
       await addNotification(io, {
         title: "卡片：法槌卡",
         content: `${cardUser.name}使用了法槌卡，當前最有錢小隊(${maxMoneyPlayer.name})損失1/4的現金($${moneyToBeSubtracted})，${cardUser.name}獲得其中一半的錢($${moneyGained})`,
+        type: "card",
       });
       break;
 
@@ -597,6 +603,7 @@ async function useCard(io, { playerId, card }) {
       await addNotification(io, {
         title: "卡片：房稅卡",
         content: `${cardUser.name}使用了房稅卡，其他所有隊伍損失持有房產總價值20%的現金`,
+        type: "card",
       });
       break;
 
@@ -653,18 +660,21 @@ async function triggerNextEvent(io, { playerId }) {
       await addNotification(io, {
         title: `事件：${name}`,
         content: `${player.name}觸發事件：${description}(${addtionalInfo})`,
+        type: "event",
       });
       break;
     case "小夫我要進來了":
       await addNotification(io, {
         title: `事件：${name}`,
         content: `${player.name}觸發事件：${description}`,
+        type: "event",
       });
       break;
     case "公主號靠岸":
       await addNotification(io, {
         title: `事件：${name}`,
         content: `${player.name}觸發事件：${description}`,
+        type: "event",
       });
       break;
     case "武漢肺炎":
@@ -697,12 +707,14 @@ async function triggerNextEvent(io, { playerId }) {
       await addNotification(io, {
         title: `事件：${name}`,
         content: `${player.name}觸發事件：${description}(${addtionalInfo})`,
+        type: "event",
       });
       break;
     case "裂地衝擊":
       await addNotification(io, {
         title: `事件：${name}`,
         content: `${player.name}觸發事件：${description}`,
+        type: "event",
       });
       break;
     case "革命":
@@ -725,12 +737,14 @@ async function triggerNextEvent(io, { playerId }) {
       await addNotification(io, {
         title: `事件：${name}`,
         content: `${player.name}觸發事件：${description}`,
+        type: "event",
       });
       break;
     case "梅圃":
       await addNotification(io, {
         title: `事件：${name}`,
         content: `${player.name}觸發事件：${description}`,
+        type: "event",
       });
       break;
     case "流星雨":
@@ -749,6 +763,7 @@ async function triggerNextEvent(io, { playerId }) {
       await addNotification(io, {
         title: `事件：${name}`,
         content: `${player.name}觸發事件：${description}(${addtionalInfo})`,
+        type: "event",
       });
       break;
     case "靈堂失火":
@@ -758,6 +773,7 @@ async function triggerNextEvent(io, { playerId }) {
       await addNotification(io, {
         title: `事件：${name}`,
         content: `${player.name}觸發事件：${description}`,
+        type: "event",
       });
       break;
     default:
