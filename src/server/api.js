@@ -470,6 +470,13 @@ async function destroySpace(io, { spaceNum }) {
     });
   }
 
+  // Add notification
+  await addNotification(io, {
+    title: "通知：房產被拆除",
+    content: `第${space.num}格的房產(${space.name})被拆除了！`,
+    type: "info",
+  });
+
   // Broadcast players update
   await broadcastPlayersChange(io, [...updatedPlayerIds]);
 
@@ -753,18 +760,17 @@ async function triggerNextEvent(io, { playerId }) {
       }).exec();
       const buildingNums = buildings.map((building) => building.num);
       const toBeDestroy = utils.shuffle(buildingNums).slice(0, 5);
+      toBeDestroy.sort((a, b) => a - b);
+      await addNotification(io, {
+        title: `事件：${name}`,
+        content: `${player.name}觸發事件：${description}`,
+        type: "event",
+      });
       await Promise.all(
         toBeDestroy.map(async (spaceNum) => {
           await destroySpace(io, { spaceNum });
         })
       );
-      toBeDestroy.sort((a, b) => a - b);
-      addtionalInfo = `被摧毀的建築：${toBeDestroy.join(", ")}`;
-      await addNotification(io, {
-        title: `事件：${name}`,
-        content: `${player.name}觸發事件：${description}(${addtionalInfo})`,
-        type: "event",
-      });
       break;
     case "靈堂失火":
       const cemeterySpace = await model.Space.findOne({ name: "墳場" }).exec();
