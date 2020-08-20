@@ -4,7 +4,6 @@ import clsx from "clsx";
 import { formatDistanceToNow, parseISO } from "date-fns";
 
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
-import RadioButtonCheckedIcon from "@material-ui/icons/RadioButtonChecked";
 
 import { makeStyles } from "@material-ui/core/styles";
 
