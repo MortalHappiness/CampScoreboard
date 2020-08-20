@@ -43,6 +43,8 @@ const notificationSlice = createSlice({
     notificationsUpdated(state, action) {
       const notifications = action.payload;
       notifications.forEach((notification) => {
+        // When state.readTime is undefined, the following comparison
+        // resolves to false, so all notification.read is false
         notification.read = notification.time <= state.readTime;
       });
       notificationsAdapter.upsertMany(state, notifications);
