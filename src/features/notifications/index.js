@@ -3,6 +3,9 @@ import { useSelector, useDispatch } from "react-redux";
 import clsx from "clsx";
 import { formatDistanceToNow, parseISO } from "date-fns";
 
+import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
+import RadioButtonCheckedIcon from "@material-ui/icons/RadioButtonChecked";
+
 import { makeStyles } from "@material-ui/core/styles";
 
 import {
@@ -21,6 +24,13 @@ const useStyles = makeStyles({
   notificationList: {
     textAlign: "left",
   },
+  notificationTitle: {
+    display: "flex",
+    fontWeight: "bold",
+    alignItems: "center",
+    marginBottom: "0.3em",
+    fontSize: "1.2em",
+  },
   isNew: {
     backgroundColor: "rgba(29, 161, 242, 0.1)",
   },
@@ -29,19 +39,31 @@ const useStyles = makeStyles({
   },
 });
 
+const notificationTypeColor = {
+  welcome: "#0058ff",
+  event: "#ff0000",
+  card: "#ff8400",
+  info: "#0ac70a",
+};
+
 // ========================================
 
 const Notification = ({ data }) => {
   const classes = useStyles();
 
-  const { title, content, time, read } = data;
+  const { title, content, time, read, type } = data;
   const timeAgo = formatDistanceToNow(parseISO(time));
+
   const className = clsx(classes.notification, !read && classes.isNew);
+
+  const typeColor = notificationTypeColor[type];
 
   return (
     <div className={className}>
-      <div>
-        <b>{title}</b>
+      <div className={classes.notificationTitle}>
+        <FiberManualRecordIcon style={{ color: typeColor }} />
+        &nbsp;
+        {title}
       </div>
       <div>{content}</div>
       <div title={time}>
